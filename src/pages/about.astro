@@ -1,14 +1,28 @@
 ---
 import Base from '../layouts/Base.astro';
+import ThenNow from '../components/about/ThenNow.astro';
+import Topics from '../components/about/Topics.astro';
+import TextTodo from '../components/TextTodo.astro';
+import { INTRO } from '../data/about';
 ---
 
-<Base title="About">
-  <!-- Temporary page so the nav can be checked; the real page comes in step 5. -->
-  <section class="k-about py-10">
-    <h1 class="flex items-center gap-3 text-[clamp(34px,6vw,56px)] leading-tight font-extrabold tracking-tight">
-      <span class="h-[30px] w-3 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>About
-    </h1>
-    <p class="text-[17px] text-soft">Most of my friends call me Bussuf.</p>
-    <p class="mt-4 text-soft">[About page: step 5]</p>
-  </section>
+<Base title="About" description="Assaf Elad, also known as Bussuf: music, making games, apps, AI talks, Excel and the games I play.">
+  <div class="k-about pb-10">
+    <div class="grid items-start gap-7 pt-[22px] nav:grid-cols-[240px_minmax(0,1fr)]">
+      <div class="max-w-[200px] nav:max-w-none" data-a="pop"><ThenNow /></div>
+      <div>
+        <h1 class="mt-0 mb-1.5 text-[clamp(34px,6vw,56px)] leading-[1.08] font-extrabold tracking-[-0.015em]" data-a="left" style="--d:90ms">
+          About
+        </h1>
+        <p class="mb-2.5 max-w-[48ch] text-[19px]" data-a="left" style="--d:150ms">
+          Most of my friends call me <b class="font-semibold text-plum">Bussuf</b>. I have been fascinated by computers and everything
+          they can do since I was a kid.
+        </p>
+        <div data-a="up" style="--d:230ms"><TextTodo what={INTRO.todo.what} words={INTRO.todo.words} /></div>
+      </div>
+    </div>
+
+    <h2 class="mt-[26px] mb-2.5 border-b border-rule pb-1 text-xl font-semibold" data-a="left">What I do, and what I play</h2>
+    <Topics />
+  </div>
 </Base>

@@ -80,6 +80,10 @@
 .k-apps { --c: var(--sky); --c-on: var(--on-sky); }
 .k-about { --c: var(--plum); --c-on: var(--on-plum); }
 .k-home { --c: var(--grass); --c-on: var(--on-grass); }
+/* About topics that are not doors */
+.k-ai { --c: var(--plum); --c-on: var(--on-plum); }
+.k-excel { --c: var(--grass); --c-on: var(--on-grass); }
+.k-play { --c: var(--sun); --c-on: var(--on-sun); }
 
 @layer base {
   body {

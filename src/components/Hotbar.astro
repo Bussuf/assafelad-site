@@ -27,6 +27,7 @@ const { current } = Astro.props;
           ]}
           aria-current={current === item.key ? 'page' : undefined}
           data-sound={item.sound}
+          data-nav={item.key}
         >
           <Icon name={item.key} class="size-5" />
           {item.label}

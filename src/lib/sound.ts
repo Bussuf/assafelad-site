@@ -121,6 +121,9 @@ export const tapLow = (): void => noise(850, 12, 0.55, 'bandpass', 0, 0.16);
 
 export const note = (name: NoteName): void => pluck(NOTES[name]);
 
+/** Any pitch, for the ukulele's chords. */
+export const pluckHz = (freq: number, when = 0): void => pluck(freq, 0.2, 1.1, when);
+
 /** Home in the bar and the game window: the rolled C chord. */
 export const chord = (): void =>
   [NOTES.C4, NOTES.E4, NOTES.G4, NOTES.C5].forEach((f, i) => pluck(f, 0.16, 1.2, i * 0.07));

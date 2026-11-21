@@ -4,6 +4,7 @@
  */
 import { navigate } from 'astro:transitions/client';
 import * as sound from '../lib/sound';
+import { ukeStep } from '../lib/ukulele';
 
 const THEME_KEY = 'assaf-theme';
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -14,6 +15,7 @@ document.addEventListener(
   (event) => {
     const el = (event.target as Element | null)?.closest<HTMLElement>('a, button, [role="button"]');
     if (!el || el.hasAttribute('data-sound-toggle') || el.hasAttribute('data-dice')) return;
+    if (el.dataset.nav) trackBar(el.dataset.nav);
     const kind = el.dataset.sound;
     if (kind === 'chord') sound.chord();
     else if (kind === 'low') sound.tapLow();
@@ -50,6 +52,31 @@ document.addEventListener('click', (event) => {
   const diceBtn = target?.closest<HTMLButtonElement>('[data-dice]');
   if (diceBtn) rollDice(diceBtn);
 });
+
+/* Ukulele mode: the bar notes in the order G C E A, three times. This module lives across page swaps, so the
+   sequence does too. The window opens after the last note has had time to ring. */
+let barSequence = '';
+let navigating = false;
+let ukeWaiting = false;
+const openUke = () => window.dispatchEvent(new Event('assaf:ukulele'));
+document.addEventListener('astro:before-preparation', () => (navigating = true));
+document.addEventListener('astro:page-load', () => {
+  navigating = false;
+  // the last note's page swap finished after the 700ms: open on the new page, or the window would be swapped away
+  if (ukeWaiting) {
+    ukeWaiting = false;
+    openUke();
+  }
+});
+function trackBar(navKey: string): void {
+  const r = ukeStep(barSequence, navKey);
+  barSequence = r.sequence;
+  if (!r.done || !sound.isSoundOn()) return;
+  setTimeout(() => {
+    if (navigating) ukeWaiting = true;
+    else openUke();
+  }, 700);
+}
 
 /* Surprise me: a random project page (the list comes from the content, on the button), never the one open now. */
 function rollDice(btn: HTMLButtonElement): void {

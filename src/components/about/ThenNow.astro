@@ -1,0 +1,123 @@
+---
+import Placeholder from '../Placeholder.astro';
+import { INTRO } from '../../data/about';
+
+/* Not a button: the current portrait is shown; hover (mouse), focus (keyboard) or a tap (touch) dissolves it
+   into the childhood photo, with a magic chime and sparkles. Leaving brings "now" back with a softer chime. */
+const sparks = [
+  [14, 18, 0],
+  [78, 12, 0.08],
+  [88, 52, 0.16],
+  [10, 64, 0.12],
+  [52, 6, 0.22],
+  [66, 86, 0.05],
+  [30, 90, 0.18],
+];
+---
+
+<div class="tn" tabindex="0" data-then-now aria-label="Now and then photo. Hover, focus or tap to see then.">
+  <Placeholder caption={INTRO.now.caption} file={INTRO.now.file} kind={INTRO.now.kind} ratio="4:5" class="now" />
+  <Placeholder caption={INTRO.then.caption} file={INTRO.then.file} kind={INTRO.then.kind} ratio="4:5" class="then" />
+  {sparks.map(([x, y, d]) => <span class="spk" style={`--x:${x}%;--y:${y}%;--sd:${d}s`} aria-hidden="true" />)}
+  <span class="tnl" aria-hidden="true"><span class="l-now">Now</span><span class="l-then">Then</span></span>
+</div>
+
+<style>
+  .tn { position: relative; display: grid; border-radius: 8px; outline-offset: 3px; }
+  .tn > :global(.ph) {
+    grid-area: 1 / 1;
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.8s ease;
+  }
+  .tn > :global(.then) { opacity: 0; transform: scale(0.94) rotate(2deg); filter: blur(10px) brightness(1.8); }
+  .tn.flip > :global(.then),
+  .tn:focus-visible > :global(.then) { opacity: 1; transform: none; filter: none; }
+  .tn.flip > :global(.now),
+  .tn:focus-visible > :global(.now) { opacity: 0; transform: scale(1.04) rotate(-2deg); filter: blur(10px) brightness(1.8); }
+  @media (hover: hover) and (pointer: fine) {
+    .tn:hover > :global(.then) { opacity: 1; transform: none; filter: none; }
+    .tn:hover > :global(.now) { opacity: 0; transform: scale(1.04) rotate(-2deg); filter: blur(10px) brightness(1.8); }
+    .tn:hover .spk { animation: spark 0.9s ease-out var(--sd) both; }
+    .tn:hover .l-then { background: var(--plum); color: var(--on-plum); }
+    .tn:hover .l-now { background: none; color: var(--soft); }
+  }
+
+  .spk {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 14px;
+    height: 14px;
+    margin: -7px;
+    pointer-events: none;
+    opacity: 0;
+    background: var(--sun);
+    clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  }
+  .tn.flip .spk,
+  .tn:focus-visible .spk { animation: spark 0.9s ease-out var(--sd) both; }
+  @keyframes spark {
+    0% { opacity: 0; transform: scale(0) rotate(0); }
+    40% { opacity: 1; transform: scale(1.3) rotate(90deg); }
+    100% { opacity: 0; transform: scale(0) rotate(180deg); }
+  }
+
+  .tnl {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: inline-flex;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--paper);
+    font-size: 12.5px;
+  }
+  .tnl span { padding: 1px 10px; color: var(--soft); transition: background-color 0.3s, color 0.3s; }
+  .l-now { background: var(--plum); color: var(--on-plum) !important; }
+  .tn.flip .l-now,
+  .tn:focus-visible .l-now { background: none; color: var(--soft) !important; }
+  .tn.flip .l-then,
+  .tn:focus-visible .l-then { background: var(--plum); color: var(--on-plum); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tn > :global(.ph) { transition: opacity 0.3s; transform: none !important; filter: none !important; }
+    .spk { display: none; }
+  }
+</style>
+
+<script>
+  import { magic } from '../../lib/sound';
+
+  /* Delegated (survives page swaps). Mouse: hover. Keyboard: focus. Touch and pen: a tap toggles. */
+  const isTn = (el: EventTarget | null) => (el instanceof Element ? el.closest<HTMLElement>('[data-then-now]') : null);
+  const finePointer = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  document.addEventListener('mouseover', (e) => {
+    const tn = isTn(e.target);
+    if (tn && finePointer() && !tn.contains(e.relatedTarget as Node | null)) magic(true);
+  });
+  document.addEventListener('mouseout', (e) => {
+    const tn = isTn(e.target);
+    if (tn && finePointer() && !tn.contains(e.relatedTarget as Node | null) && !tn.classList.contains('flip')) magic(false);
+  });
+  document.addEventListener('pointerup', (e) => {
+    if (e.pointerType === 'mouse') return;
+    const tn = isTn(e.target);
+    if (tn) magic(tn.classList.toggle('flip'));
+  });
+  document.addEventListener('focusin', (e) => {
+    const tn = isTn(e.target);
+    if (tn && tn === e.target && tn.matches(':focus-visible')) {
+      tn.dataset.kb = '1';
+      magic(true);
+    }
+  });
+  document.addEventListener('focusout', (e) => {
+    const tn = isTn(e.target);
+    // only a keyboard focus revealed "then", so only its blur plays the way back
+    if (tn && tn === e.target && tn.dataset.kb) {
+      delete tn.dataset.kb;
+      if (!tn.classList.contains('flip')) magic(false);
+    }
+  });
+</script>

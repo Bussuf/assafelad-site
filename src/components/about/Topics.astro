@@ -1,0 +1,281 @@
+---
+import Icon from '../Icon.astro';
+import Placeholder from '../Placeholder.astro';
+import TextTodo from '../TextTodo.astro';
+import { PLATFORMS, STEAM_LIBRARY, TOPICS } from '../../data/about';
+import { allProjects, countLine, langOf, projectHref } from '../../lib/projects';
+
+/* Topic tiles (tabs) with one shared detail panel. Switch on click only (his decision); arrow keys move between tabs.
+   Without JavaScript every panel is shown, one under the other. */
+const projects = await allProjects();
+const byId = new Map(projects.map((p) => [p.id, p]));
+const totalHours = Math.round(STEAM_LIBRARY.reduce((sum, g) => sum + g.hours, 0));
+const fmt = (n: number) => n.toLocaleString('en-US');
+
+/** Hebrew runs (the band name) go inside <bdi lang="he">. */
+const runs = (text: string) => text.split(/([֐-׿][֐-׿ ]*[֐-׿]|[֐-׿])/);
+const btn = 'justify-self-start inline-flex items-center gap-1.5 rounded-md border border-door px-3 py-[3px] text-sm font-medium text-ink';
+---
+
+<div class="topics grid items-start gap-6 nav:grid-cols-[270px_minmax(0,1fr)]" data-topics>
+  <div class="grid gap-2" role="tablist" aria-label="Topics" aria-orientation="vertical">
+    {
+      TOPICS.map((t, i) => (
+        <button
+          type="button"
+          class={`tile k-${t.id}`}
+          role="tab"
+          id={`tab-${t.id}`}
+          aria-controls={`panel-${t.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-topic={t.id}
+          data-a={['drop', 'pop', 'up', 'right', 'drop', 'pop'][i]}
+          style={`--d:${80 + i * 60}ms`}
+        >
+          <Icon name={t.icon} class="size-[22px] row-span-2" />
+          <b>{t.title}</b>
+          <small>{t.oneLine}</small>
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="panels" data-a="right" style="--d:200ms">
+    {
+      TOPICS.map((t, i) => {
+        const items = t.door ? projects.filter((p) => p.data.door === t.door) : [];
+        return (
+          <section
+            class={`detail k-${t.id}`}
+            role="tabpanel"
+            id={`panel-${t.id}`}
+            aria-labelledby={`tab-${t.id}`}
+            data-topic-panel={t.id}
+            hidden={i !== 0}
+          >
+            <div class="dh">
+              <Icon name={t.icon} class="size-[22px]" />
+              <span>{t.title}</span>
+              {t.door && <small>{countLine(t.door, items)}</small>}
+            </div>
+            <div class="db">
+              <Placeholder caption={t.image.caption} file={t.image.file} kind={t.image.kind} ratio="16:9" />
+              {t.body && (
+                <p>
+                  {runs(t.body).map((part, j) => (j % 2 ? <bdi lang="he">{part}</bdi> : part))}
+                </p>
+              )}
+
+              {t.highlights && (
+                <>
+                  <h3 class="dsub">Highlights</h3>
+                  <div class="grid gap-1.5">
+                    {t.highlights.map((id) => {
+                      const p = byId.get(id);
+                      if (!p) throw new Error(`About topic "${t.id}": no project "${id}"`);
+                      return (
+                        <a href={projectHref(p)} class="hl">
+                          <Placeholder caption={p.data.hero.caption} file={p.data.hero.file} kind={p.data.hero.kind} ratio="4:3" size="tiny" />
+                          <bdi lang={langOf(p.data.name)}>{p.data.name}</bdi>
+                          <span class:list={['st', p.data.state]}>{p.data.status}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {t.gallery && (
+                <div class="grid grid-cols-2 gap-2.5">
+                  {t.gallery.map((g) => <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio="4:3" size="small" />)}
+                </div>
+              )}
+
+              {t.parts?.map((part) => (
+                <>
+                  <h3 class="dsub">{part.heading}</h3>
+                  {part.paragraphs.map((s) => <p>{s}</p>)}
+                  <div class="grid grid-cols-2 gap-2.5">
+                    {part.gallery.map((g) => <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio="4:3" size="small" />)}
+                  </div>
+                  {part.todo && <TextTodo what={part.todo.what} words={part.todo.words} lines={2} />}
+                  {part.go && <a href={part.go.href} class={btn}>{part.go.label}</a>}
+                </>
+              ))}
+
+              {t.id === 'play' && (
+                <>
+                  <p class="text-sm text-soft">
+                    My favorites on Steam with over 100 hours: {STEAM_LIBRARY.length} games, {fmt(totalHours)} hours together. I
+                    regret nothing.
+                  </p>
+                  <div class="lib">
+                    {STEAM_LIBRARY.map((g) => (
+                      <span class="game">
+                        <Placeholder caption={`${g.name}: my own screenshot`} file={g.file} kind="screen" ratio="16:9" size="tiny" />
+                        <b>{g.name}</b>
+                        <em>{fmt(g.hours)} h</em>
+                      </span>
+                    ))}
+                  </div>
+                  <div class="grid gap-1.5">
+                    {PLATFORMS.map((pl) => (
+                      <span class="plat">
+                        <b>{pl.name}</b>
+                        {pl.url ? (
+                          <a href={pl.url} class="text-link underline underline-offset-2" target="_blank" rel="me noopener">
+                            {pl.label}
+                          </a>
+                        ) : (
+                          <em>{pl.label}</em>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {t.todo && <TextTodo what={t.todo.what} words={t.todo.words} lines={2} />}
+              {t.go && <a href={t.go.href} class={btn}>{t.go.label}</a>}
+              {t.hint && (
+                <p class="hint">
+                  <Icon name="music" class="size-4 flex-none text-door" />
+                  <span>{t.hint}</span>
+                </p>
+              )}
+            </div>
+          </section>
+        );
+      })
+    }
+  </div>
+</div>
+
+<noscript><style>[data-topic-panel] { display: block !important; margin-bottom: 16px; }</style></noscript>
+
+<style>
+  .tile {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1px 10px;
+    align-items: center;
+    text-align: left;
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    background: var(--raise);
+    padding: 11px 12px;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .tile :global(svg) { color: var(--c); transition: transform 0.2s; }
+  .tile b { font-weight: 600; }
+  .tile small { color: var(--soft); font-size: 12.5px; line-height: 1.35; }
+  .tile[aria-selected='true'],
+  .tile:focus-visible { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--raise)); }
+  .tile[aria-selected='true'] :global(svg) { transform: scale(1.12) rotate(-4deg); }
+  @media (hover: hover) and (pointer: fine) {
+    .tile:hover { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--raise)); }
+  }
+
+  .detail { overflow: hidden; border: 1px solid var(--rule); border-radius: 8px; background: var(--raise); scroll-margin-top: 76px; }
+  @media (min-width: 43.75rem) {
+    .detail { position: sticky; top: 76px; }
+  }
+  .dh { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--c); color: var(--c-on); font-weight: 700; font-size: 19px; }
+  .dh span { flex: 1; }
+  .dh small { font-size: 13px; font-weight: 500; opacity: 0.85; }
+  .db { display: grid; gap: 10px; padding: 14px; }
+  .db p { margin: 0; }
+  .detail.swap .db > * { animation: a-right 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .detail.swap .db > :nth-child(2) { animation-delay: 0.05s; }
+  .detail.swap .db > :nth-child(3) { animation-delay: 0.1s; }
+  .detail.swap .db > :nth-child(4) { animation-delay: 0.15s; }
+  .dsub { margin: 8px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); font-weight: 600; font-size: 16px; }
+  .hl {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--paper);
+    padding: 5px 8px 5px 5px;
+    font-size: 14.5px;
+  }
+  .hl:hover { border-color: var(--c); }
+  .lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  .game { display: grid; gap: 2px; font-size: 12.5px; line-height: 1.25; }
+  .game b { font-weight: 500; }
+  .game em { font-style: normal; color: var(--c); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .plat { display: flex; justify-content: space-between; gap: 10px; border: 1px solid var(--rule); border-radius: 6px; padding: 5px 10px; background: var(--paper); font-size: 14px; }
+  .plat b { font-weight: 500; }
+  .plat em { font-style: normal; color: var(--soft); font-size: 13px; }
+  .hint {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 4px !important;
+    padding-top: 10px;
+    border-top: 1px dashed var(--rule);
+    font-size: 13.5px;
+    color: var(--soft);
+    font-style: italic;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .detail.swap .db > * { animation: none; }
+    .tile, .tile :global(svg) { transition: none; }
+  }
+</style>
+
+<script>
+  /* Tabs: click selects, arrows move and select, Home/End jump. Re-run after every page swap. */
+  function setup(): void {
+    const root = document.querySelector<HTMLElement>('[data-topics]');
+    if (!root) return;
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+
+    const select = (tab: HTMLButtonElement, focus: boolean) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = root.querySelector<HTMLElement>(`[data-topic-panel="${t.dataset.topic}"]`)!;
+        panel.hidden = !on;
+        if (on && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          panel.classList.remove('swap');
+          void panel.offsetWidth;
+          panel.classList.add('swap');
+        }
+      });
+      if (focus) tab.focus();
+      // on a phone the panel sits under the tiles: bring it into view
+      if (!matchMedia('(min-width: 43.75rem)').matches) {
+        root.querySelector(`[data-topic-panel="${tab.dataset.topic}"]`)?.scrollIntoView({ block: 'start' });
+      }
+    };
+
+    root.addEventListener('click', (e) => {
+      const tab = (e.target as Element).closest<HTMLButtonElement>('[role="tab"]');
+      if (tab && tab.getAttribute('aria-selected') !== 'true') select(tab, false);
+    });
+    root.addEventListener('keydown', (e) => {
+      const i = tabs.indexOf(document.activeElement as HTMLButtonElement);
+      if (i < 0) return;
+      const to =
+        e.key === 'ArrowDown' || e.key === 'ArrowRight'
+          ? (i + 1) % tabs.length
+          : e.key === 'ArrowUp' || e.key === 'ArrowLeft'
+            ? (i - 1 + tabs.length) % tabs.length
+            : e.key === 'Home'
+              ? 0
+              : e.key === 'End'
+                ? tabs.length - 1
+                : -1;
+      if (to < 0) return;
+      e.preventDefault();
+      select(tabs[to]!, true);
+    });
+  }
+
+  document.addEventListener('astro:page-load', setup);
+</script>

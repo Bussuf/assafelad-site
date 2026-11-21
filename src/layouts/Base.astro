@@ -5,6 +5,7 @@ import { Font } from 'astro:assets';
 import Header from '../components/Header.astro';
 import Hotbar from '../components/Hotbar.astro';
 import Footer from '../components/Footer.astro';
+import Ukulele from '../components/Ukulele.astro';
 import { navKeyOf } from '../lib/nav';
 
 interface Props {
@@ -59,6 +60,7 @@ const pageTitle = current === 'home' ? title : `${title} | Assaf Elad`;
     </main>
     <Footer />
     <Hotbar current={current} />
+    <Ukulele />
     <script>
       import '../scripts/ui';
     </script>
