@@ -45,7 +45,7 @@ const stand =
           <iframe
             data-src={embed.url}
             title={`${name}, playable`}
-            style={`aspect-ratio:${embed.width}/${embed.height}`}
+            style={`aspect-ratio:${embed.width}/${embed.height};width:min(calc(100vw - 72px), calc((100dvh - 190px) * ${embed.width} / ${embed.height}), 1100px)`}
             allow="autoplay; fullscreen; gamepad"
             allowfullscreen
           />
@@ -66,8 +66,11 @@ const stand =
 }
 
 <style>
+  /* fits the game: narrow for phone-shaped games, wide for landscape ones */
   .gw {
-    width: min(880px, calc(100% - 32px));
+    width: fit-content;
+    min-width: min(560px, calc(100% - 32px));
+    max-width: calc(100% - 32px);
     max-height: calc(100dvh - 32px);
     margin: auto;
     padding: 0;
@@ -98,9 +101,7 @@ const stand =
     display: block;
     border: 0;
     border-radius: 6px;
-    height: min(calc(100dvh - 190px), 680px);
-    width: auto;
-    max-width: 100%;
+    height: auto;
     background: var(--paper);
   }
   .gfoot {

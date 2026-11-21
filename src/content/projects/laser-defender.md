@@ -15,3 +15,11 @@ gallery:
   - { caption: "Boss fight", file: laser-defender-02.png, kind: screen }
   - { caption: "High-score table", file: laser-defender-03.png, kind: screen }
 ---
+
+<!-- First draft, rewritten from the itch.io page (2026-11-22). Assaf corrects it. -->
+
+A top-down space shooter, made in Unity 2D. You fly a starship through waves of alien ships, pick up the loot they drop, and use it to upgrade your weapons before the boss fights.
+
+Most of the work went into the feel: the screen shakes when you take a hit, particles fly, and the gun overheats if you hold the trigger too long. Stay undamaged and your kill combo keeps growing.
+
+**Controls:** WASD or the arrows to move, Space to shoot.

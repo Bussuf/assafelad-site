@@ -15,3 +15,9 @@ gallery:
   - { caption: "Start screen", file: simon-02.png, kind: screen }
   - { caption: "Game over screen", file: simon-03.png, kind: screen }
 ---
+
+<!-- First draft, rewritten from the itch.io page (2026-11-22). Assaf corrects it. -->
+
+My take on the classic memory toy. SIMON plays a sequence of colors and sounds, and you repeat it. Every round adds one more step, until your memory gives up.
+
+Small, but every piece of it is mine, from the animations and effects to the code. It plays on a phone too.
