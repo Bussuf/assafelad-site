@@ -1,0 +1,140 @@
+---
+import Placeholder from '../Placeholder.astro';
+import { langOf, projectHref, type Project } from '../../lib/projects';
+
+/* Flip between the projects of one door without scrolling to "More in".
+   Desktop: a strip of every project in the door, the current one marked, plus the arrow keys.
+   Phone: ‹ previous · N of M · next ›. Wraps around: after the last comes the first. */
+interface Props {
+  project: Project;
+  /** every project in this door, in door order (including the current one) */
+  items: Project[];
+}
+
+const { project, items } = Astro.props;
+const i = items.findIndex((p) => p.id === project.id);
+const prev = items[(i - 1 + items.length) % items.length]!;
+const next = items[(i + 1) % items.length]!;
+---
+
+{
+  items.length > 1 && (
+    <nav aria-label="Projects in this section" class="switcher" data-switcher>
+      <ol class="strip" style={`--n:${items.length}`}>
+        {items.map((p) => (
+          <li>
+            <a href={projectHref(p)} class="item" title={p.data.name} aria-current={p.id === project.id ? 'page' : undefined}>
+              <span class="thumb">
+                <Placeholder caption={p.data.hero.caption} file={p.data.hero.file} kind={p.data.hero.kind} ratio="4:3" size="tiny" />
+              </span>
+              <bdi lang={langOf(p.data.name)}>{p.data.name}</bdi>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <div class="pager">
+        <a href={projectHref(prev)} class="pg" rel="prev" data-prev>
+          <span aria-hidden="true">‹</span>
+          <span class="sr-only">Previous: </span>
+          <bdi lang={langOf(prev.data.name)}>{prev.data.name}</bdi>
+        </a>
+        <span class="pos">
+          {i + 1} of {items.length}
+        </span>
+        <a href={projectHref(next)} class="pg next" rel="next" data-next>
+          <span class="sr-only">Next: </span>
+          <bdi lang={langOf(next.data.name)}>{next.data.name}</bdi>
+          <span aria-hidden="true">›</span>
+        </a>
+      </div>
+    </nav>
+  )
+}
+
+<style>
+  .switcher { padding-top: 14px; }
+
+  /* desktop strip */
+  .strip {
+    display: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 8px;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    padding: 5px 8px 5px 5px;
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    background: var(--raise);
+    color: var(--soft);
+    font-size: 13.5px;
+    line-height: 1.25;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .item bdi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item[aria-current='page'] {
+    border-color: var(--c);
+    color: var(--ink);
+    font-weight: 600;
+    background: color-mix(in srgb, var(--c) 14%, var(--raise));
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .item:hover { border-color: var(--c); color: var(--ink); }
+  }
+
+  /* phone pager */
+  .pager {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+  .pg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--raise);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .pg bdi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pg > span[aria-hidden] { font-size: 20px; line-height: 1; color: var(--c); }
+  .pg.next { justify-content: flex-end; text-align: right; }
+  .pos { font-size: 12.5px; color: var(--soft); white-space: nowrap; }
+
+  @media (min-width: 43.75rem) {
+    .strip { display: grid; }
+    .pager { display: none; }
+  }
+</style>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+  import { tap } from '../../lib/sound';
+
+  /* ← → flip between projects on a project page. Not while a window is open, not with modifier keys,
+     and not when focus is in a field or a tab list (those use the arrows themselves). */
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.defaultPrevented) return;
+    if (document.querySelector('dialog[open]')) return;
+    const t = e.target as Element;
+    if (t.closest('input, textarea, select, [contenteditable], [role="tablist"], iframe')) return;
+    const link = document.querySelector<HTMLAnchorElement>(e.key === 'ArrowLeft' ? '[data-switcher] [data-prev]' : '[data-switcher] [data-next]');
+    if (!link) return;
+    e.preventDefault();
+    tap();
+    void navigate(link.href);
+  });
+</script>

@@ -7,6 +7,7 @@ import TextTodo from '../../components/TextTodo.astro';
 import ProjectCard from '../../components/door/ProjectCard.astro';
 import PlayButton from '../../components/project/PlayButton.astro';
 import GameWindow from '../../components/project/GameWindow.astro';
+import ProjectSwitcher from '../../components/project/ProjectSwitcher.astro';
 import { DOORS } from '../../data/home';
 import { allProjects, langOf, type Project } from '../../lib/projects';
 import { isTall } from '../../lib/images';
@@ -15,16 +16,18 @@ export const getStaticPaths = (async () => {
   const projects = await allProjects();
   return projects.map((project) => ({
     params: { door: project.data.door, slug: project.id },
-    props: { project, related: projects.filter((p) => p.data.door === project.data.door && p.id !== project.id) },
+    props: { project, siblings: projects.filter((p) => p.data.door === project.data.door) },
   }));
 }) satisfies GetStaticPaths;
 
 interface Props {
   project: Project;
-  related: Project[];
+  /** every project in this door, in door order */
+  siblings: Project[];
 }
 
-const { project, related } = Astro.props;
+const { project, siblings } = Astro.props;
+const related = siblings.filter((p) => p.id !== project.id);
 const { name, door, status, state, made, summary, summaryTodo, link, hero, gallery } = project.data;
 const doorInfo = DOORS.find((d) => d.key === door)!;
 const music = door === 'music';
@@ -39,8 +42,9 @@ const tallGallery = gallery.length > 0 && gallery.every((g) => isTall(g.file));
 ---
 
 <Base title={name} description={summary ?? `${name}: ${status}`}>
-  <div class={`k-${door} pt-[18px] pb-10`}>
-    <div data-a="zoom" style="--d:40ms">
+  <div class={`k-${door} pb-10`}>
+    <ProjectSwitcher project={project} items={siblings} />
+    <div class="mt-3.5" data-a="zoom" style="--d:40ms">
       <Placeholder caption={hero.caption} file={hero.file} kind={hero.kind} ratio="21:9" />
     </div>
 
