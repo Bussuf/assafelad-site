@@ -63,7 +63,8 @@
   --color-plum: var(--plum);
   --color-live: var(--live);
   --color-dev: var(--dev);
-  /* the door color of the current element, set by the k-* classes below */
+  /* the door color of the current element, set by the k-* classes below.
+     In arbitrary values use var(--c), not var(--color-door): that variable resolves at :root, where --c is unset. */
   --color-door: var(--c, var(--ink));
   --color-on-door: var(--c-on, var(--paper));
 }

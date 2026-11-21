@@ -22,7 +22,7 @@ const { current } = Astro.props;
           class:list={[
             `k-${item.key} grid h-[52px] w-14 content-center justify-items-center gap-0.5 rounded-lg border text-[10.5px] transition-transform active:scale-95`,
             current === item.key
-              ? 'border-door bg-[color-mix(in_srgb,var(--color-door)_16%,var(--color-raise))] text-ink [&_svg]:text-door'
+              ? 'border-door bg-[color-mix(in_srgb,var(--c)_16%,var(--color-raise))] text-ink [&_svg]:text-door'
               : 'border-rule bg-raise text-soft',
           ]}
           aria-current={current === item.key ? 'page' : undefined}
