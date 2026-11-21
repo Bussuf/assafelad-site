@@ -1,0 +1,29 @@
+---
+import Icon from './Icon.astro';
+
+/* Grey bars that stand for text Assaf still has to write, labelled with what and how long. */
+interface Props {
+  what: string;
+  words: number;
+  lines?: number;
+}
+
+const { what, words, lines = 3 } = Astro.props;
+---
+
+<div class="tph" aria-label={`Text to write: ${what}`}>
+  <span class="tl"><Icon name="text" class="size-3.5" />[{what}, about {words} words]</span>
+  {Array.from({ length: lines }, () => <i />)}
+</div>
+
+<style>
+  .tph { display: grid; gap: 7px; margin: 4px 0 14px; max-width: 62ch; }
+  .tl { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--soft); }
+  i {
+    display: block;
+    height: 9px;
+    border-radius: 5px;
+    background: repeating-linear-gradient(90deg, var(--cloud) 0 46px, transparent 46px 52px);
+  }
+  i:last-child { width: 58%; }
+</style>

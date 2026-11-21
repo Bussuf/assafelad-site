@@ -1,0 +1,149 @@
+---
+import Icon from '../Icon.astro';
+import Placeholder from '../Placeholder.astro';
+import { langOf, type Project } from '../../lib/projects';
+
+/* The window that Play opens: the game itself (official embed), the Windows download, or the song player. */
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const { name, door, play, embed, link, status, state } = project.data;
+const music = play === 'song';
+
+const note =
+  play === 'download'
+    ? 'Windows only. Download the .zip, unzip it and run the game.'
+    : music
+      ? 'Plays here, without leaving the site.'
+      : 'Plays here. Keyboard and mouse work inside the window.';
+const outLabel = play === 'download' ? 'Go to the download page' : link ? `Open on ${link.label}` : '';
+const stand =
+  play === 'download'
+    ? 'ChessLord landing page: the Windows demo (.zip with the .exe)'
+    : music
+      ? 'Song player [song files coming]'
+      : `${name} in a window [embed link coming]`;
+---
+
+{
+  play && (
+    <dialog class={`gw k-${door}`} data-game-window={project.id} aria-label={name}>
+      <div class="gbar">
+        <Icon name={music ? 'music' : 'games'} class="size-[18px] text-door" />
+        <b>
+          <bdi lang={langOf(name)}>{name}</bdi>
+        </b>
+        <span class:list={['st', state]}>{status}</span>
+        <button type="button" class="close" data-close data-sound="low">
+          Close
+        </button>
+      </div>
+      <div class="gbody">
+        {embed ? (
+          <iframe
+            data-src={embed.url}
+            title={`${name}, playable`}
+            style={`aspect-ratio:${embed.width}/${embed.height}`}
+            allow="autoplay; fullscreen; gamepad"
+            allowfullscreen
+          />
+        ) : (
+          <Placeholder caption={stand} file={`${project.id}-play`} kind="screen" ratio={music ? '21:9' : '16:9'} size="small" />
+        )}
+      </div>
+      <div class="gfoot">
+        <span>{note}</span>
+        {link?.url && (
+          <a href={link.url} class="text-link underline underline-offset-2" target="_blank" rel="noopener">
+            {outLabel}
+          </a>
+        )}
+      </div>
+    </dialog>
+  )
+}
+
+<style>
+  .gw {
+    width: min(880px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    color: var(--ink);
+    background: var(--raise);
+    border: 1px solid var(--c);
+    border-radius: 10px;
+  }
+  .gw[open] { animation: a-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .gw::backdrop { background: rgb(5 8 12 / 0.72); }
+  .gbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .gbar b { flex: 1; min-width: 0; font-weight: 600; font-size: 17px; }
+  .close {
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 14px;
+    color: var(--soft);
+  }
+  .gbody { padding: 12px; display: grid; justify-items: center; }
+  .gbody iframe {
+    display: block;
+    border: 0;
+    border-radius: 6px;
+    height: min(calc(100dvh - 190px), 680px);
+    width: auto;
+    max-width: 100%;
+    background: var(--paper);
+  }
+  .gfoot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 12px 12px;
+    font-size: 13.5px;
+    color: var(--soft);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gw[open] { animation: none; }
+  }
+</style>
+
+<script>
+  /* Delegated, so it works on every page after ClientRouter swaps. The game loads only when opened
+     (nothing from itch.io before the visitor presses Play) and is unloaded on close, so it stops. */
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element | null;
+    const play = target?.closest<HTMLElement>('[data-play]');
+    if (play) {
+      const dialog = document.querySelector<HTMLDialogElement>(`[data-game-window="${play.dataset.play}"]`);
+      if (!dialog) return;
+      const frame = dialog.querySelector<HTMLIFrameElement>('iframe[data-src]');
+      if (frame && !frame.src) frame.src = frame.dataset.src!;
+      dialog.showModal();
+      return;
+    }
+    const dialog = target?.closest<HTMLDialogElement>('dialog[data-game-window]');
+    if (!dialog) return;
+    // Close button, or a click on the dim area around the window (the dialog itself, not its content)
+    if (target?.closest('[data-close]') || target === dialog) dialog.close();
+  });
+
+  document.addEventListener(
+    'close',
+    (event) => {
+      const dialog = event.target as Element;
+      if (!(dialog instanceof HTMLDialogElement) || !dialog.matches('[data-game-window]')) return;
+      dialog.querySelector('iframe')?.removeAttribute('src');
+    },
+    true,
+  );
+</script>

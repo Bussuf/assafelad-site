@@ -66,6 +66,8 @@ export interface Door {
   key: DoorKey;
   title: string;
   sub: string;
+  /** the opening line of the door page */
+  intro: string;
   href: string;
   cover: Shot;
 }
@@ -75,6 +77,7 @@ export const DOORS: readonly Door[] = [
     key: 'music',
     title: 'Music',
     sub: 'Sing-alongs, lessons, songs',
+    intro: 'Sing-alongs, guitar lessons, songs of my own, and a band on a break.',
     href: '/music',
     cover: { caption: 'Assaf with guitar at a sing-along', file: 'home-13.jpg', kind: 'photo' },
   },
@@ -82,6 +85,7 @@ export const DOORS: readonly Door[] = [
     key: 'games',
     title: 'Play games',
     sub: 'Games I made in Unity',
+    intro: 'Games I made in Unity, from small classics to ChessLord.',
     href: '/games',
     cover: { caption: 'ChessLord key art', file: 'home-14.png', kind: 'screen' },
   },
@@ -89,6 +93,7 @@ export const DOORS: readonly Door[] = [
     key: 'apps',
     title: 'Apps',
     sub: 'Apps and systems I built',
+    intro: 'Management systems, Flutter apps and a final project. Private systems are shown as screenshots only.',
     href: '/apps',
     cover: { caption: 'Collage of app screens, data blurred', file: 'home-15.png', kind: 'screen' },
   },

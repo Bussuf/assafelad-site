@@ -1,0 +1,26 @@
+---
+import Icon from '../Icon.astro';
+import { playLabel, type Project } from '../../lib/projects';
+
+interface Props {
+  project: Project;
+  class?: string;
+}
+
+const { project, class: className } = Astro.props;
+---
+
+{
+  project.data.play && (
+    <button
+      type="button"
+      class:list={['play-btn relative z-[1]', className]}
+      data-play={project.id}
+      data-sound="chord"
+      aria-haspopup="dialog"
+    >
+      <Icon name="play" class="size-3 fill-current stroke-none" />
+      {playLabel(project)}
+    </button>
+  )
+}

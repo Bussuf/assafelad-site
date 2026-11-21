@@ -1,0 +1,119 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Placeholder from '../../components/Placeholder.astro';
+import TextTodo from '../../components/TextTodo.astro';
+import ProjectCard from '../../components/door/ProjectCard.astro';
+import PlayButton from '../../components/project/PlayButton.astro';
+import GameWindow from '../../components/project/GameWindow.astro';
+import { DOORS } from '../../data/home';
+import { allProjects, langOf, type Project } from '../../lib/projects';
+
+export const getStaticPaths = (async () => {
+  const projects = await allProjects();
+  return projects.map((project) => ({
+    params: { door: project.data.door, slug: project.id },
+    props: { project, related: projects.filter((p) => p.data.door === project.data.door && p.id !== project.id) },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+  related: Project[];
+}
+
+const { project, related } = Astro.props;
+const { name, door, status, state, made, summary, summaryTodo, link, hero, gallery } = project.data;
+const doorInfo = DOORS.find((d) => d.key === door)!;
+const music = door === 'music';
+const { Content } = await render(project);
+const hasAbout = !!project.body?.trim();
+const aboutTodo = music
+  ? { what: 'About: what it is, who it is for, how to join', words: 70 }
+  : { what: 'About: what it is, why I made it, one thing I learned', words: 90 };
+const motions = ['right', 'pop', 'drop', 'up'];
+---
+
+<Base title={name} description={summary ?? `${name}: ${status}`}>
+  <div class={`k-${door} pt-[18px] pb-10`}>
+    <div data-a="zoom" style="--d:40ms">
+      <Placeholder caption={hero.caption} file={hero.file} kind={hero.kind} ratio="21:9" />
+    </div>
+
+    <div class="mt-[18px] mb-1.5 flex flex-wrap items-center justify-between gap-3">
+      <h1
+        class="m-0 flex items-center gap-3 text-[clamp(34px,6vw,56px)] leading-[1.08] font-extrabold tracking-[-0.015em] text-balance"
+        data-a="left"
+        style="--d:140ms"
+      >
+        <span class="h-[30px] w-3 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
+        <bdi lang={langOf(name)}>{name}</bdi>
+      </h1>
+      <span data-a="pop" style="--d:280ms"><PlayButton project={project} /></span>
+    </div>
+
+    <div class="mt-1.5 mb-2.5 flex flex-wrap gap-2 text-sm" data-a="up" style="--d:220ms">
+      <a href={doorInfo.href} class="rounded-md border border-rule px-2.5 py-0.5 font-medium text-ink">{doorInfo.title}</a>
+      <span class:list={['st self-center', state]}>{status}</span>
+      <span class="rounded-md border border-rule px-2.5 py-0.5 text-soft">Made with <b class="font-medium text-ink">{made}</b></span>
+    </div>
+
+    {summary ? <p class="mb-4 max-w-[60ch] text-[17px] text-soft">{summary}</p> : <TextTodo what={summaryTodo!} words={20} lines={1} />}
+
+    <div class="grid items-start gap-7 nav:grid-cols-2">
+      <div data-a="up" style="--d:300ms">
+        <h2>About</h2>
+        {hasAbout ? <div><Content /></div> : <TextTodo what={aboutTodo.what} words={aboutTodo.words} lines={5} />}
+        <h2>{music ? 'Where to hear it' : 'Where to see it'}</h2>
+        <p>
+          {
+            project.data.private
+              ? 'A private system with real data. Shown as screenshots only.'
+              : link?.url
+                ? <a href={link.url} class="text-link underline underline-offset-2" target="_blank" rel="noopener">{link.label}</a>
+                : link
+                  ? link.label
+                  : '[Link coming.]'
+          }
+        </p>
+      </div>
+      <div>
+        <h2>Gallery</h2>
+        <div class="grid grid-cols-2 gap-2.5">
+          {
+            gallery.slice(0, 4).map((g, i) => (
+              <div class:list={[{ 'col-span-2': i === 0 }]} data-a={motions[i]} style={`--d:${320 + i * 90}ms`}>
+                <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio={i === 0 ? '16:9' : '4:3'} size="small" />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <>
+          <h2>More in {doorInfo.title}</h2>
+          <div class="grid grid-cols-2 gap-2.5 nav:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] nav:gap-3">
+            {related.map((p, i) => <ProjectCard project={p} compact motion="right" delay={420 + i * 60} />)}
+          </div>
+        </>
+      )
+    }
+
+    <GameWindow project={project} />
+  </div>
+</Base>
+
+<style>
+  h2 {
+    margin: 26px 0 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 20px;
+    font-weight: 600;
+  }
+  p { margin: 0 0 10px; max-width: 64ch; }
+</style>

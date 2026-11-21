@@ -4,7 +4,6 @@
  */
 import { navigate } from 'astro:transitions/client';
 import * as sound from '../lib/sound';
-import { NAV } from '../lib/nav';
 
 const THEME_KEY = 'assaf-theme';
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -52,12 +51,19 @@ document.addEventListener('click', (event) => {
   if (diceBtn) rollDice(diceBtn);
 });
 
-/* Surprise me: until the projects exist (step 4) it opens a random other page. */
+/* Surprise me: a random project page (the list comes from the content, on the button), never the one open now. */
 function rollDice(btn: HTMLButtonElement): void {
   if (btn.classList.contains('rolling')) return;
   const here = location.pathname.replace(/\/$/, '') || '/';
-  const choices = NAV.map((item) => item.href).filter((href) => href !== here);
-  const pick = choices[Math.floor(Math.random() * choices.length)] ?? '/';
+  let targets: string[] = [];
+  try {
+    targets = JSON.parse(btn.dataset.targets ?? '[]') as string[];
+  } catch {
+    return;
+  }
+  const choices = targets.filter((href) => href !== here);
+  const pick = choices[Math.floor(Math.random() * choices.length)];
+  if (!pick) return;
   sound.dice();
   if (reduceMotion()) {
     void navigate(pick);

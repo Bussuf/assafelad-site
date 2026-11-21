@@ -1,0 +1,49 @@
+---
+import Placeholder from '../Placeholder.astro';
+import PlayButton from '../project/PlayButton.astro';
+import { langOf, projectHref, type Project } from '../../lib/projects';
+
+interface Props {
+  project: Project;
+  /** the short card under a project page ("More in"): no summary, no Play */
+  compact?: boolean;
+  motion?: string;
+  delay?: number;
+}
+
+const { project, compact = false, motion, delay = 0 } = Astro.props;
+const { name, status, state, summary, summaryTodo, hero } = project.data;
+---
+
+<article
+  class="card relative grid content-start overflow-hidden rounded-[7px] bg-raise shadow-[0_0_0_1px_var(--color-rule)] transition-[box-shadow,transform] duration-150"
+  data-card
+  data-status={status}
+  data-a={motion}
+  style={`--d:${delay}ms`}
+>
+  <Placeholder caption={hero.caption} file={hero.file} kind={hero.kind} ratio="4:3" size="small" class="flat" />
+  <div class="grid justify-items-start gap-1 px-[11px] pt-[9px] pb-3">
+    <!-- the name link covers the whole card; Play sits above it -->
+    <a href={projectHref(project)} class="font-semibold after:absolute after:inset-0 after:content-['']">
+      <bdi lang={langOf(name)}>{name}</bdi>
+    </a>
+    <span class:list={['st', state]}>{status}</span>
+    {
+      !compact && (
+        <p class="m-0 hidden text-[13.5px] text-soft nav:block">{summary ?? `[${summaryTodo}]`}</p>
+      )
+    }
+    {!compact && <PlayButton project={project} />}
+  </div>
+</article>
+
+<style>
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover {
+      box-shadow: 0 0 0 1px var(--c);
+      transform: translateY(-2px);
+    }
+  }
+  .card:focus-within { box-shadow: 0 0 0 1px var(--c); }
+</style>

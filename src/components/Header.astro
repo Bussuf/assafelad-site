@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import { NAV, type NavKey } from '../lib/nav';
+import { allProjects, projectHref } from '../lib/projects';
 
 interface Props {
   current: NavKey;
@@ -8,6 +9,8 @@ interface Props {
 
 const { current } = Astro.props;
 const tabs = NAV.filter((item) => item.key !== 'home');
+// Surprise me picks only project pages: never Home, a door page or About.
+const diceTargets = JSON.stringify((await allProjects()).map(projectHref));
 const tool =
   'inline-flex items-center gap-1.5 rounded-md border border-rule px-[9px] py-[3px] text-sm text-soft hover:text-ink';
 ---
@@ -33,7 +36,7 @@ const tool =
           </a>
         ))
       }
-      <button type="button" class:list={['dice', tool]} data-dice title="Open a random page">
+      <button type="button" class:list={['dice', tool]} data-dice data-targets={diceTargets} title="Open a random project">
         <Icon name="dice" /><span class="hidden nav:inline" data-dice-label>Surprise me</span>
       </button>
       <button type="button" class={tool} data-sound-toggle aria-pressed="false" title="Sound effects">

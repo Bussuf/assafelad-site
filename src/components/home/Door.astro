@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import Icon from '../Icon.astro';
 import Placeholder from '../Placeholder.astro';
 import type { Door } from '../../data/home';
+import { countLine, langOf } from '../../lib/projects';
 
 interface Props {
   door: Door;
@@ -15,15 +16,8 @@ interface Props {
 const { door, items, motion, delay } = Astro.props;
 const featured = items.find((p) => p.data.featured)!;
 const peek = items.slice(0, 3);
-const he = (s: string) => (/[֐-׿]/.test(s) ? 'he' : undefined);
-
-const n = items.length;
-const count =
-  door.key === 'games'
-    ? `${n} games, ${items.filter((p) => p.data.play && p.data.play !== 'song').length} playable`
-    : door.key === 'music'
-      ? `${n} pages, ${items.filter((p) => p.data.state === 'live').length} active`
-      : `${n} projects, ${items.filter((p) => p.data.private).length} private systems`;
+const he = langOf;
+const count = countLine(door.key, items);
 ---
 
 <article class={`door k-${door.key}`} data-door data-a={motion} style={`--d:${delay}ms`}>

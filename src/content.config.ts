@@ -31,10 +31,15 @@ const projects = defineCollection({
     private: z.boolean().default(false),
     /** what Play opens: a game in a window, the Windows download page, or a song player */
     play: z.enum(['window', 'download', 'song']).optional(),
+    /** the game inside the window: an official embed page and the game's own size */
+    embed: z
+      .object({ url: z.url(), width: z.number().int().positive(), height: z.number().int().positive() })
+      .optional(),
     hero: shot,
     gallery: z.array(shot).default([]),
   }).refine((p) => p.summary || p.summaryTodo, { message: 'Give a summary, or a summaryTodo saying what to write' })
-    .refine((p) => !(p.private && p.link?.url), { message: 'A private system must not link to the live system' }),
+    .refine((p) => !(p.private && p.link?.url), { message: 'A private system must not link to the live system' })
+    .refine((p) => !p.embed || p.play === 'window', { message: 'embed only makes sense with play: window' }),
 });
 
 export const collections = { projects };

@@ -98,6 +98,36 @@
 .site-top.stuck { box-shadow: 0 10px 24px -16px rgb(0 0 0 / 0.75); }
 .site-top.stuck .site-header { padding-block: 8px; }
 
+/* status badge: live green, in development amber, everything else neutral */
+.st {
+  display: inline-block;
+  font-size: 12.5px;
+  padding: 0 7px;
+  border-radius: 4px;
+  background: var(--cloud);
+  color: var(--soft);
+  white-space: nowrap;
+}
+.st.live { background: color-mix(in srgb, var(--live) 16%, var(--paper)); color: var(--live); }
+.st.dev { background: color-mix(in srgb, var(--dev) 18%, var(--paper)); color: var(--dev); }
+
+/* the green Play button (Play now / Download (Windows) / Play a song) */
+.play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 5px;
+  background: var(--grass);
+  color: var(--on-grass);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 10px 3px 8px;
+  white-space: nowrap;
+}
+
+/* no page scroll behind an open game window */
+html:has(dialog[open]) { overflow: hidden; }
+
 /* toggle icons follow the state in CSS, so they are right on first paint */
 [data-sound-toggle] [data-when],
 [data-theme-toggle] [data-when] { display: contents; }
