@@ -1,0 +1,195 @@
+---
+import Icon from '../Icon.astro';
+import Placeholder from '../Placeholder.astro';
+import { BANNER, WORD_MS } from '../../data/home';
+
+const first = BANNER[0]!;
+const words = JSON.stringify(BANNER.map(({ word, color, caption }) => ({ word, color, caption })));
+---
+
+<section
+  class="banner grid items-center gap-[18px] pt-[26px] pb-[22px] nav:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] nav:gap-7 nav:pt-10 nav:pb-[34px]"
+  data-banner
+  data-words={words}
+  data-ms={WORD_MS}
+  data-paused="false"
+  style={`--ms:${WORD_MS}ms`}
+>
+  <div>
+    <p class="mb-2.5 text-[15px] text-soft" data-a="up">Hi, I'm Assaf. Most of my friends call me Bussuf.</p>
+    <p
+      class="m-0 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[clamp(40px,7.4vw,72px)] leading-[1.04] font-extrabold tracking-[-0.015em]"
+      data-a="left"
+      style="--d:80ms"
+    >
+      I play
+      <span class={`reel k-${first.color}`} data-reel><span data-word>{first.word}</span></span>
+    </p>
+    <p class="mt-4 max-w-[40ch] text-[17px] text-soft nav:min-h-[3.2em]" data-cap data-a="up" style="--d:180ms">
+      {first.caption}
+    </p>
+    <div class="mt-3.5 flex items-center gap-3" data-a="up" style="--d:240ms">
+      <div class={`track k-${first.color}`} data-track><i data-prog></i></div>
+      <button type="button" class="pause" data-pause>
+        <span data-when="playing"><Icon name="pause" class="size-3.5" />Pause</span>
+        <span data-when="paused"><Icon name="play" class="size-3.5" />Play</span>
+      </button>
+    </div>
+  </div>
+  <div data-a="pop" style="--d:140ms">
+    {
+      BANNER.map((w, i) => (
+        <div class={`collage k-${w.color}`} data-collage hidden={i !== 0}>
+          {w.shots.map((s, j) => (
+            <Placeholder caption={s.caption} file={s.file} kind={s.kind} ratio="1:1" size={j === 0 ? 'normal' : 'small'} />
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .reel {
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 8px;
+    padding: 0 16px 6px;
+    background: var(--c);
+    color: var(--c-on);
+    transition: background-color 0.4s;
+  }
+  .reel span { display: inline-block; }
+  .reel.anim span { animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes rise { from { transform: translateY(70%); opacity: 0; } }
+
+  .track {
+    flex: 0 1 160px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--rule);
+    overflow: hidden;
+  }
+  .track i { display: block; height: 100%; width: 0; background: var(--c); }
+  .track i.run { animation: fill var(--ms) linear forwards; }
+  [data-paused='true'] .track i { animation-play-state: paused; }
+  @keyframes fill { to { width: 100%; } }
+
+  .pause {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 13px;
+    color: var(--soft);
+  }
+  .pause span { display: inline-flex; align-items: center; gap: 6px; }
+  [data-paused='true'] [data-when='playing'],
+  [data-paused='false'] [data-when='paused'] { display: none; }
+
+  /* An exact grid: the box sets the height, so the big image and the two small ones share top and bottom edges.
+     (Square cells left the last small one 10px lower - the gap.) Real photos will fill the cells with object-fit: cover. */
+  .collage {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    aspect-ratio: 3 / 2;
+  }
+  .collage > :global(.ph) { aspect-ratio: auto; height: 100%; min-height: 0; }
+  .collage > :global(.ph:first-child) { grid-row: span 2; }
+  .collage.swap > :global(.ph:nth-child(1)) { animation: a-pop 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .collage.swap > :global(.ph:nth-child(2)) { animation: a-right 0.55s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .collage.swap > :global(.ph:nth-child(3)) { animation: a-drop 0.55s 0.16s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reel.anim span,
+    .collage.swap > :global(.ph) { animation: none; }
+    .track i.run { animation: none; width: 100%; }
+  }
+</style>
+
+<script>
+  import { Countdown } from '../../lib/countdown';
+
+  interface Word {
+    word: string;
+    color: string;
+    caption: string;
+  }
+
+  let stop: (() => void) | null = null;
+
+  /* Runs on every visit to the home page (the ClientRouter swaps pages without reloading). */
+  function setup(): void {
+    stop?.();
+    stop = null;
+    const root = document.querySelector<HTMLElement>('[data-banner]');
+    if (!root) return;
+    const words = JSON.parse(root.dataset.words ?? '[]') as Word[];
+    const reel = root.querySelector<HTMLElement>('[data-reel]')!;
+    const wordEl = root.querySelector<HTMLElement>('[data-word]')!;
+    const cap = root.querySelector<HTMLElement>('[data-cap]')!;
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const prog = root.querySelector<HTMLElement>('[data-prog]')!;
+    const collages = [...root.querySelectorAll<HTMLElement>('[data-collage]')];
+    const countdown = new Countdown(Number(root.dataset.ms));
+    let index = 0;
+    let timer = 0;
+    let paused = false;
+
+    const restart = (el: HTMLElement, cls: string) => {
+      el.classList.remove(cls);
+      void el.offsetWidth;
+      el.classList.add(cls);
+    };
+
+    const arm = () => {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => show((index + 1) % words.length, true), countdown.run());
+    };
+
+    function show(n: number, animate: boolean): void {
+      index = n;
+      const w = words[n]!;
+      reel.className = `reel k-${w.color}`;
+      track.className = `track k-${w.color}`;
+      wordEl.textContent = w.word;
+      cap.textContent = w.caption;
+      collages.forEach((c, i) => {
+        c.hidden = i !== n;
+        if (i === n && animate) restart(c, 'swap');
+      });
+      if (animate) restart(reel, 'anim');
+      prog.classList.remove('run');
+      void prog.offsetWidth;
+      countdown.reset();
+      if (!paused) {
+        prog.classList.add('run');
+        arm();
+      }
+    }
+
+    root.querySelector('[data-pause]')!.addEventListener('click', () => {
+      paused = !paused;
+      root.dataset.paused = String(paused);
+      if (paused) {
+        clearTimeout(timer);
+        countdown.pause();
+      } else {
+        prog.classList.add('run');
+        arm();
+      }
+    });
+
+    show(0, false);
+    stop = () => clearTimeout(timer);
+  }
+
+  document.addEventListener('astro:page-load', setup);
+  document.addEventListener('astro:before-swap', () => {
+    stop?.();
+    stop = null;
+  });
+</script>

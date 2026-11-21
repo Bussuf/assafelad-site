@@ -1,0 +1,169 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Icon from '../Icon.astro';
+import Placeholder from '../Placeholder.astro';
+import type { Door } from '../../data/home';
+
+interface Props {
+  door: Door;
+  /** this door's projects, in order */
+  items: CollectionEntry<'projects'>[];
+  motion: 'drop' | 'up';
+  delay: number;
+}
+
+const { door, items, motion, delay } = Astro.props;
+const featured = items.find((p) => p.data.featured)!;
+const peek = items.slice(0, 3);
+const he = (s: string) => (/[֐-׿]/.test(s) ? 'he' : undefined);
+
+const n = items.length;
+const count =
+  door.key === 'games'
+    ? `${n} games, ${items.filter((p) => p.data.play && p.data.play !== 'song').length} playable`
+    : door.key === 'music'
+      ? `${n} pages, ${items.filter((p) => p.data.state === 'live').length} active`
+      : `${n} projects, ${items.filter((p) => p.data.private).length} private systems`;
+---
+
+<article class={`door k-${door.key}`} data-door data-a={motion} style={`--d:${delay}ms`}>
+  <a href={door.href} class="dmain">
+    <span class="dtop">
+      <Icon name={door.key} class="size-7 row-span-2" />
+      <b>{door.title}</b>
+      <small>{door.sub}</small>
+    </span>
+    <span class="dbody">
+      <span class="layer rest">
+        <Placeholder caption={door.cover.caption} file={door.cover.file} kind={door.cover.kind} ratio="16:9" />
+        <span class="feat">
+          <small>Start here</small>
+          <b><bdi lang={he(featured.data.name)}>{featured.data.name}</bdi></b>
+          <span>{featured.data.status}</span>
+        </span>
+      </span>
+      <span class="layer peek" aria-hidden="true">
+        <span class="count3">{count}</span>
+        <span class="thumbs">
+          {peek.map((p) => <Placeholder caption={p.data.hero.caption} file={p.data.hero.file} kind={p.data.hero.kind} ratio="4:3" size="tiny" />)}
+        </span>
+        <small>Inside</small>
+        <span class="plist">
+          {
+            peek.map((p) => (
+              <span>
+                <bdi lang={he(p.data.name)}>{p.data.name}</bdi>
+                <em>{p.data.status}</em>
+              </span>
+            ))
+          }
+        </span>
+      </span>
+    </span>
+  </a>
+  <button type="button" class="peekbtn" data-peek aria-expanded="false">Peek</button>
+</article>
+
+<style>
+  .door {
+    position: relative;
+    border-radius: 8px;
+    background: var(--raise);
+    box-shadow: 0 0 0 1px var(--rule);
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .door:focus-within,
+  .door.open {
+    box-shadow: 0 0 0 1px var(--c), 0 4px 0 color-mix(in srgb, var(--c) 45%, transparent);
+    transform: translateY(-2px);
+  }
+  .door:active { transform: scale(0.97); }
+  .dmain { display: block; border-radius: 8px; color: inherit; }
+  .dtop {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--c);
+    color: var(--c-on);
+    border-radius: 8px 8px 0 0;
+  }
+  .dtop b { font-weight: 700; font-size: 23px; line-height: 1.1; }
+  .dtop small { font-size: 13.5px; opacity: 0.85; }
+  .dbody { display: grid; padding: 14px 16px 16px; }
+  .layer {
+    grid-area: 1 / 1;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    transition: opacity 0.35s, visibility 0.35s;
+  }
+  .peek { opacity: 0; visibility: hidden; }
+  .door:focus-within .rest,
+  .door.open .rest { opacity: 0; visibility: hidden; }
+  .door:focus-within .peek,
+  .door.open .peek { opacity: 1; visibility: visible; }
+  .door:focus-within .peek :global(.ph),
+  .door.open .peek :global(.ph) { animation: a-pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .peek .thumbs > :global(.ph:nth-child(2)) { animation-delay: 0.12s !important; }
+  .peek .thumbs > :global(.ph:nth-child(3)) { animation-delay: 0.24s !important; }
+
+  /* hover only where there is a real pointer; touch uses the Peek button */
+  @media (hover: hover) and (pointer: fine) {
+    .door:hover {
+      box-shadow: 0 0 0 1px var(--c), 0 4px 0 color-mix(in srgb, var(--c) 45%, transparent);
+      transform: translateY(-2px);
+    }
+    .door:hover .rest { opacity: 0; visibility: hidden; }
+    .door:hover .peek { opacity: 1; visibility: visible; }
+    .door:hover .peek :global(.ph) { animation: a-pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  }
+
+  .feat small, .peek small { display: block; color: var(--soft); font-size: 12.5px; }
+  .feat b { display: block; font-weight: 600; font-size: 16px; }
+  .feat span { font-size: 13.5px; color: var(--soft); }
+  .count3 { font-weight: 600; font-size: 16px; }
+  .thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .plist { display: grid; gap: 3px; font-size: 14px; }
+  .plist > span { display: flex; justify-content: space-between; gap: 8px; }
+  .plist em { font-style: normal; color: var(--soft); font-size: 12.5px; white-space: nowrap; }
+
+  .peekbtn {
+    display: none;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: 1px solid color-mix(in srgb, var(--c-on) 40%, transparent);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 12.5px;
+    color: var(--c-on);
+  }
+  @media (hover: none), (pointer: coarse) {
+    .peekbtn { display: inline-flex; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .door, .layer { transition: none; }
+    .door :global(.ph) { animation: none !important; }
+  }
+</style>
+
+<script>
+  /* Touch: Peek opens one door's preview at a time. Delegated, so it survives page swaps. */
+  document.addEventListener('click', (event) => {
+    const btn = (event.target as Element | null)?.closest<HTMLButtonElement>('[data-peek]');
+    if (!btn) return;
+    const door = btn.closest('[data-door]');
+    const open = !door?.classList.contains('open');
+    document.querySelectorAll('[data-door]').forEach((d) => {
+      const mine = d === door && open;
+      d.classList.toggle('open', mine);
+      const b = d.querySelector('[data-peek]');
+      if (b) {
+        b.setAttribute('aria-expanded', String(mine));
+        b.textContent = mine ? 'Close' : 'Peek';
+      }
+    });
+  });
+</script>

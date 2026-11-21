@@ -1,12 +1,30 @@
 ---
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Banner from '../components/home/Banner.astro';
+import Door from '../components/home/Door.astro';
+import { DOORS } from '../data/home';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+
+const doors = DOORS.map((door) => {
+  const items = projects.filter((p) => p.data.door === door.key);
+  const featured = items.filter((p) => p.data.featured);
+  // The "Start here" line needs exactly one; fail the build instead of showing the wrong project.
+  if (featured.length !== 1) {
+    throw new Error(`Door "${door.key}" needs exactly one featured project, found ${featured.length}`);
+  }
+  return { door, items };
+});
+const motions = ['drop', 'up', 'drop'] as const;
 ---
 
 <Base title="Assaf Elad">
-  <!-- Temporary: the banner and the three doors come in step 3. -->
-  <section class="py-10">
-    <p class="mb-2.5 text-soft">Hi, I'm Assaf. Most of my friends call me Bussuf.</p>
-    <h1 class="text-[clamp(40px,7vw,72px)] leading-none font-extrabold tracking-tight">I play ___</h1>
-    <p class="mt-4 text-soft">[Home page: step 3]</p>
+  <Banner />
+  <section
+    class="grid grid-cols-1 gap-3.5 pb-10 nav:grid-cols-3 nav:gap-[18px]"
+    aria-label="Doors"
+  >
+    {doors.map(({ door, items }, i) => <Door door={door} items={items} motion={motions[i]!} delay={350 + i * 220} />)}
   </section>
 </Base>

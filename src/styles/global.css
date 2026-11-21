@@ -106,6 +106,28 @@
 :root:not([data-theme="light"]) [data-theme-toggle] [data-when="light"],
 :root[data-theme="light"] [data-theme-toggle] [data-when="dark"] { display: none; }
 
+/* Entrance motion: varied, once per page view. data-a="up|left|right|pop|drop|zoom", delay in --d. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-a] {
+    animation: 0.62s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  [data-a='up'] { animation-name: a-up; }
+  [data-a='left'] { animation-name: a-left; }
+  [data-a='right'] { animation-name: a-right; }
+  [data-a='pop'] { animation-name: a-pop; }
+  [data-a='drop'] { animation-name: a-drop; }
+  [data-a='zoom'] { animation-name: a-zoom; animation-duration: 0.9s; }
+  /* the doors enter slower (his note on v7) */
+  [data-door][data-a] { animation-duration: 1s; }
+}
+@keyframes a-up { from { opacity: 0; transform: translateY(20px); } }
+@keyframes a-left { from { opacity: 0; transform: translateX(-32px); } }
+@keyframes a-right { from { opacity: 0; transform: translateX(32px); } }
+@keyframes a-pop { from { opacity: 0; transform: scale(0.86); } }
+@keyframes a-drop { from { opacity: 0; transform: translateY(-26px) rotate(-1.5deg); } }
+@keyframes a-zoom { from { opacity: 0; transform: scale(1.06); } }
+
 /* Surprise me: the dice rolls before the random page opens */
 .dice.rolling svg { animation: dice-roll 0.65s cubic-bezier(0.3, 0.6, 0.3, 1); }
 @keyframes dice-roll { to { transform: rotate(720deg) scale(1.15); } }

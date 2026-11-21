@@ -62,6 +62,7 @@ Sounds are synthesized with Web Audio (no library) until Assaf supplies recordin
 | `astro` | The framework |
 | `tailwindcss`, `@tailwindcss/vite` | Styling (Tailwind v4) |
 | `typescript`, `@astrojs/check` | `npm run check` |
+| `vitest` (dev) | `npm run test`: logic tests (banner countdown; later the ukulele sequence) |
 | `@astrojs/sitemap` | Approved, installed only in step 6 |
 No other package, and no new file, without explaining why and getting approval.
 
