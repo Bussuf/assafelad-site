@@ -6,14 +6,22 @@ import { langOf, type Project } from '../../lib/projects';
 /* The window that Play opens: the game itself (official embed), the Windows download, or the song player. */
 interface Props {
   project: Project;
+  /** "demo": the second button's window (ChessLord's early version) */
+  variant?: 'main' | 'demo';
 }
 
-const { project } = Astro.props;
-const { name, door, play, embed, link, status, state } = project.data;
+const { project, variant = 'main' } = Astro.props;
+const { name, door, status, state, demo } = project.data;
+const isDemo = variant === 'demo';
+const play = isDemo ? (demo ? 'window' : undefined) : project.data.play;
+const embed = isDemo ? demo?.embed : project.data.embed;
+const link = isDemo ? (demo ? { label: 'Unity Play', url: demo.link } : undefined) : project.data.link;
+const key = isDemo ? `${project.id}--demo` : project.id;
 const music = play === 'song';
 
-const note =
-  play === 'download'
+const note = isDemo
+  ? 'An early version. Plays here; keyboard and mouse work inside the window.'
+  : play === 'download'
     ? 'Windows only. Download the .zip, unzip it and run the game.'
     : music
       ? 'Plays here, without leaving the site.'
@@ -29,13 +37,14 @@ const stand =
 
 {
   play && (
-    <dialog class={`gw k-${door}`} data-game-window={project.id} aria-label={name}>
+    <dialog class={`gw k-${door}`} data-game-window={key} aria-label={isDemo ? `${name}, early version` : name}>
       <div class="gbar">
         <Icon name={music ? 'music' : 'games'} class="size-[18px] text-door" />
         <b>
           <bdi lang={langOf(name)}>{name}</bdi>
+          {isDemo && <span class="font-normal text-soft"> early version</span>}
         </b>
-        <span class:list={['st', state]}>{status}</span>
+        {!isDemo && <span class:list={['st', state]}>{status}</span>}
         <button type="button" class="close" data-close data-sound="low">
           Close
         </button>

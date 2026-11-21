@@ -9,6 +9,7 @@ import PlayButton from '../../components/project/PlayButton.astro';
 import GameWindow from '../../components/project/GameWindow.astro';
 import { DOORS } from '../../data/home';
 import { allProjects, langOf, type Project } from '../../lib/projects';
+import { isTall } from '../../lib/images';
 
 export const getStaticPaths = (async () => {
   const projects = await allProjects();
@@ -33,6 +34,8 @@ const aboutTodo = music
   ? { what: 'About: what it is, who it is for, how to join', words: 70 }
   : { what: 'About: what it is, why I made it, one thing I learned', words: 90 };
 const motions = ['right', 'pop', 'drop', 'up'];
+// Phone games (screenshots taller than wide): three tall cells side by side instead of wide ones.
+const tallGallery = gallery.length > 0 && gallery.every((g) => isTall(g.file));
 ---
 
 <Base title={name} description={summary ?? `${name}: ${status}`}>
@@ -50,7 +53,10 @@ const motions = ['right', 'pop', 'drop', 'up'];
         <span class="h-[30px] w-3 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
         <bdi lang={langOf(name)}>{name}</bdi>
       </h1>
-      <span data-a="pop" style="--d:280ms"><PlayButton project={project} /></span>
+      <span class="flex flex-wrap gap-2" data-a="pop" style="--d:280ms">
+        <PlayButton project={project} />
+        <PlayButton project={project} variant="demo" />
+      </span>
     </div>
 
     <div class="mt-1.5 mb-2.5 flex flex-wrap gap-2 text-sm" data-a="up" style="--d:220ms">
@@ -64,7 +70,7 @@ const motions = ['right', 'pop', 'drop', 'up'];
     <div class="grid items-start gap-7 nav:grid-cols-2">
       <div data-a="up" style="--d:300ms">
         <h2>About</h2>
-        {hasAbout ? <div><Content /></div> : <TextTodo what={aboutTodo.what} words={aboutTodo.words} lines={5} />}
+        {hasAbout ? <div class="about"><Content /></div> : <TextTodo what={aboutTodo.what} words={aboutTodo.words} lines={5} />}
         <h2>{music ? 'Where to hear it' : 'Where to see it'}</h2>
         <p>
           {
@@ -80,15 +86,25 @@ const motions = ['right', 'pop', 'drop', 'up'];
       </div>
       <div>
         <h2>Gallery</h2>
-        <div class="grid grid-cols-2 gap-2.5">
-          {
-            gallery.slice(0, 4).map((g, i) => (
-              <div class:list={[{ 'col-span-2': i === 0 }]} data-a={motions[i]} style={`--d:${320 + i * 90}ms`}>
-                <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio={i === 0 ? '16:9' : '4:3'} size="small" />
-              </div>
-            ))
-          }
-        </div>
+        {
+          tallGallery ? (
+            <div class="grid grid-cols-3 gap-2.5">
+              {gallery.slice(0, 3).map((g, i) => (
+                <div data-a={motions[i]} style={`--d:${320 + i * 90}ms`}>
+                  <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio="9:16" size="small" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="grid grid-cols-2 gap-2.5">
+              {gallery.slice(0, 4).map((g, i) => (
+                <div class:list={[{ 'col-span-2': i === 0 }]} data-a={motions[i]} style={`--d:${320 + i * 90}ms`}>
+                  <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio={i === 0 ? '16:9' : '4:3'} size="small" />
+                </div>
+              ))}
+            </div>
+          )
+        }
       </div>
     </div>
 
@@ -104,6 +120,7 @@ const motions = ['right', 'pop', 'drop', 'up'];
     }
 
     <GameWindow project={project} />
+    <GameWindow project={project} variant="demo" />
   </div>
 </Base>
 
@@ -115,5 +132,7 @@ const motions = ['right', 'pop', 'drop', 'up'];
     font-size: 20px;
     font-weight: 600;
   }
-  p { margin: 0 0 10px; max-width: 64ch; }
+  p,
+  .about :global(p) { margin: 0 0 10px; max-width: 64ch; }
+  .about :global(strong) { font-weight: 600; }
 </style>

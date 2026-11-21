@@ -9,11 +9,11 @@ summary: "Flappy Bird, my way: pixel art, a chiptune soundtrack, and you can fly
 link: { label: itch.io, url: https://bussuf.itch.io/fb2 }
 play: window
 embed: { url: https://itch.io/embed-upload/7090305?color=141b26, width: 350, height: 700 }
-hero: { caption: "Flappy Bird 2.0, the burger mid-flight", file: flappy-bird-01.png, kind: screen }
+hero: { caption: "Flappy Bird 2.0 cover art", file: flappy-bird-01.png, kind: screen }
 gallery:
-  - { caption: "Flappy Bird 2.0 cover art", file: flappy-bird-04.png, kind: screen }
-  - { caption: "Choosing a character", file: flappy-bird-02.png, kind: screen }
-  - { caption: "Gold medal: a score over 50", file: flappy-bird-03.png, kind: screen }
+  - { caption: "Get ready: the start screen", file: flappy-bird-02.jpg, kind: screen }
+  - { caption: "Settings, mid-flight", file: flappy-bird-03.jpg, kind: screen }
+  - { caption: "Game over", file: flappy-bird-04.jpg, kind: screen }
 ---
 
 <!-- First draft, rewritten from the itch.io page (2026-11-22). Assaf corrects it. -->

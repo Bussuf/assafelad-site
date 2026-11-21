@@ -125,6 +125,13 @@
   white-space: nowrap;
 }
 
+/* the second Play button: outlined, so the main one stays the main one */
+.play-btn.play-alt {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--grass);
+}
+
 /* no page scroll behind an open game window */
 html:has(dialog[open]) { overflow: hidden; }
 

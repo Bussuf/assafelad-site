@@ -1,14 +1,16 @@
 ---
+import { Image } from 'astro:assets';
 import Icon from './Icon.astro';
+import { findImage } from '../lib/images';
 
-/* A captioned stand-in for a photo or screenshot that is not supplied yet.
-   The caption and file name come from the assets checklist, so it is clear which file goes here. */
+/* An image slot. If a file with this name is in src/assets/images/, it shows the real image (resized, webp).
+   Otherwise it shows a captioned stand-in, with the file name from the assets checklist, so it is clear what goes here. */
 interface Props {
   caption: string;
   file: string;
   kind: 'photo' | 'screen';
   /** width:height, as in the checklist */
-  ratio: '1:1' | '4:3' | '16:9' | '21:9' | '4:5';
+  ratio: '1:1' | '4:3' | '16:9' | '21:9' | '4:5' | '9:16';
   /** tiny: icon only (thumbnails); small: smaller caption */
   size?: 'tiny' | 'small' | 'normal';
   class?: string;
@@ -16,20 +18,36 @@ interface Props {
 }
 
 const { caption, file, kind, ratio, size = 'normal', class: className, ...rest } = Astro.props;
+
+const img = findImage(file);
+const [rw, rh] = ratio.split(':').map(Number) as [number, number];
+// A very different shape (a phone-shaped screenshot in a wide slot) is shown whole, not cropped.
+const contain = !!img && size !== 'tiny' && Math.abs(img.width / img.height - rw / rh) / (rw / rh) > 0.35;
+const width = img ? Math.min(size === 'tiny' ? 160 : size === 'small' ? 720 : 1280, img.width) : 0;
 ---
 
-<span
-  class:list={['ph', size, className]}
-  style={`--r:${ratio.replace(':', '/')}`}
-  role="img"
-  aria-label={`Image placeholder: ${caption}`}
-  title={`${caption} (${file})`}
-  {...rest}
->
-  <Icon name={kind} class={size === 'tiny' ? 'size-4' : 'size-[18px]'} />
-  {size !== 'tiny' && <span class="pc">{caption}</span>}
-  {size === 'normal' && <span class="fn">{file}</span>}
-</span>
+{
+  img ? (
+    <span class:list={['ph shot', size, className, { contain }]} style={`--r:${ratio.replace(':', '/')}`} {...rest}>
+      {/* a whole image that does not fill the slot sits on a blurred copy of itself, not on an empty band */}
+      {contain && <Image src={img} alt="" width={width} class="bg" aria-hidden="true" />}
+      <Image src={img} alt={caption} width={width} class="fg" />
+    </span>
+  ) : (
+    <span
+      class:list={['ph', size, className]}
+      style={`--r:${ratio.replace(':', '/')}`}
+      role="img"
+      aria-label={`Image placeholder: ${caption}`}
+      title={`${caption} (${file})`}
+      {...rest}
+    >
+      <Icon name={kind} class={size === 'tiny' ? 'size-4' : 'size-[18px]'} />
+      {size !== 'tiny' && <span class="pc">{caption}</span>}
+      {size === 'normal' && <span class="fn">{file}</span>}
+    </span>
+  )
+}
 
 <style>
   .ph {
@@ -64,6 +82,22 @@ const { caption, file, kind, ratio, size = 'normal', class: className, ...rest }
   .tiny { padding: 0; border-radius: 4px; }
   /* top of a card: square corners, only a bottom edge */
   .flat { border-radius: 0; border-width: 0 0 1px 0; }
+  /* a real image: no stripes or dashes, the picture fills the slot */
+  .ph.shot {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: var(--paper);
+  }
+  .shot.flat { border-bottom: 1px solid var(--rule); }
+  .shot :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .shot.contain :global(img.fg) { position: relative; object-fit: contain; }
+  .shot :global(img.bg) {
+    position: absolute;
+    inset: 0;
+    filter: blur(22px) brightness(0.45);
+    transform: scale(1.2);
+  }
   .fn {
     position: absolute;
     bottom: 5px;

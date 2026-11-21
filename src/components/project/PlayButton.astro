@@ -4,23 +4,27 @@ import { playLabel, type Project } from '../../lib/projects';
 
 interface Props {
   project: Project;
+  /** "demo": the second button (ChessLord's early version), quieter than the main one */
+  variant?: 'main' | 'demo';
   class?: string;
 }
 
-const { project, class: className } = Astro.props;
+const { project, variant = 'main', class: className } = Astro.props;
+const isDemo = variant === 'demo';
+const show = isDemo ? !!project.data.demo : !!project.data.play;
 ---
 
 {
-  project.data.play && (
+  show && (
     <button
       type="button"
-      class:list={['play-btn relative z-[1]', className]}
-      data-play={project.id}
+      class:list={[isDemo ? 'play-btn play-alt' : 'play-btn', 'relative z-[1]', className]}
+      data-play={isDemo ? `${project.id}--demo` : project.id}
       data-sound="chord"
       aria-haspopup="dialog"
     >
       <Icon name="play" class="size-3 fill-current stroke-none" />
-      {playLabel(project)}
+      {isDemo ? project.data.demo!.label : playLabel(project)}
     </button>
   )
 }

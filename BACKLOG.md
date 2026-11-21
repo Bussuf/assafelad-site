@@ -9,6 +9,7 @@
 | 1 | | בניית האתר (#86 בדרייב) | צעדים 1-8 מהאפיון, לפי מוקאפ v7 | - |
 | 1.4 | 4 | ↳ עמודי דלת ופרויקט | עמודי Shelf (Grid/Table), עמוד showcase, חלון משחק, Download (Windows); הקובייה רק לפרויקטים | עמודים |
 | 1.5 | 5 | ↳ About ויוקלילי | Then/Now, נושאים בלחיצה, highlights, ספריית Steam, מצב יוקלילי והרמז | עמודים |
+| 1.5.1 | 9 | ↳ צ'קליסט נכסים מעודכן | אקסל חדש של כל התמונות והטקסטים, מתוך קובצי התוכן באתר, כשהמבנה סגור | תוכן |
 | 1.6 | 6 | ↳ SEO ונגישות | מטא, OG, sitemap, 404; Lighthouse 90+ | איכות |
 | 1.7 | 7 | ↳ ריפו ופריסה | ריפו ציבורי, GitHub Actions ל-Pages; זמנית עם `base` | פריסה |
 | 1.8 | 8 | ↳ DNS | רשומות A/CNAME ב-Site123 (לא Name Servers), HTTPS. אישור נפרד | פריסה |
@@ -52,12 +53,15 @@
 אפיון אושר (2026-11-22): Grid/Table נזכר אצל המבקר (localStorage); שדה `embed` בסכמה; חלון משחק `<dialog>`. שירים: אין עדיין שירות; SoundCloud ישן ולא מייצג. הוא שואל על העלאת קבצים משלו (הצעה: mp3 באתר עצמו).
 הטמעה (נבדק ב-itch.io, 2026-11-22): Laser Defender ו-SIMON הם משחקי דפדפן - נכנסים לחלון דרך דף ההטמעה הרשמי `itch.io/embed-upload/<id>` (7103936 324x576, 7099417 325x650). המשחק נטען רק בלחיצה על Play ונפרק בסגירה. Space Janitor: חסר קישור Unity Play. ChessLord: חלון עם הסבר וקישור להורדה.
 בדיקה (2026-11-22, localhost): Games - 6 כרטיסים, סינון Playable = 3 of 6, Table/Grid נזכר; Laser Defender נטען בחלון (מסך Unity), Close מפרק את המשחק והפוקוס חוזר לכפתור. עמודי פרויקט: השכנים (bdi), music-studio "Shown as screenshots only", ChessLord Download (Windows). הקובייה: 15 עמודי פרויקט בלבד. 375px: Grid ו-More in בשתי עמודות, בלי גלילה לצדדים. העמודים הזמניים music/games/apps הוחלפו ב-DoorPage. commit 6ac53e5 (build: 20 עמודים).
-תוספות (2026-11-22, בקשתו): **Flappy Bird 2.0** נכנס (היה "בחוץ" במלאי; הוא אוהב אותו) - itch.io `fb2`, הטמעה 7090305 350x700. **Space Janitor** נטען בחלון דרך מסגרת המשחק של Unity Play (`play-prod.struckd.com/.../build/latest/frame` - לא הטמעה רשמית; נבדק שעובד מ-localhost). טיוטות About מדף itch.io ל-Laser Defender, SIMON ו-Flappy Bird (הוא מתקן). חלון המשחק מתאים את רוחבו למשחק (צר למשחקי טלפון, רחב ל-Space Janitor). שירים: mp3 באתר עצמו כשהקבצים מוכנים (אושר). פתוח: ChessLord גרסה מוקדמת ב-Unity Play (`543bc489-...`) - כפתור שני?; מנגנון תמונות אמיתיות. Play now פותח `<dialog>` עם iframe; לבדוק לכל משחק אם itch.io / Unity Play מתירים הטמעה, ואם לא - קישור החוצה. ChessLord: Download (Windows) לדף הנחיתה. AI Capitalist: Android, In development.
+תוספות (2026-11-22, בקשתו): **Flappy Bird 2.0** נכנס (היה "בחוץ" במלאי; הוא אוהב אותו) - itch.io `fb2`, הטמעה 7090305 350x700. **Space Janitor** נטען בחלון דרך מסגרת המשחק של Unity Play (`play-prod.struckd.com/.../build/latest/frame` - לא הטמעה רשמית; נבדק שעובד מ-localhost). טיוטות About מדף itch.io ל-Laser Defender, SIMON ו-Flappy Bird (הוא מתקן). חלון המשחק מתאים את רוחבו למשחק (צר למשחקי טלפון, רחב ל-Space Janitor). שירים: mp3 באתר עצמו כשהקבצים מוכנים (אושר). **אושר ונבנה (2026-11-22):** (1) מנגנון תמונות - קובץ ב-`src/assets/images/` בשם מהאקסל מחליף את ה-Placeholder לבד (Astro Image, webp, מוקטן); צילום בצורה שונה מאוד מהמקום (צילום טלפון במקום רחב) מוצג שלם ולא חתוך. (2) ChessLord: כפתור שני "Play the early version" (שדה `demo`) שפותח את הגרסה המוקדמת מ-Unity Play בחלון - נבדק שנטען. 13 תמונות הורדו על ידו ל-`src/assets/images/` (כ-3.2MB) ונבדקו בדפדפן: כרטיסים, תמונה ראשית על רקע מטושטש של עצמה, וגלריה של 3 תאים גבוהים למשחקי טלפון (`src/lib/images.ts`). כיתובים ושמות קבצים עודכנו לפי צילומי itch.io בפועל (Laser 01-04, SIMON 01-04, Flappy 01.png + 02-04.jpg, Space Janitor 01.jpg) - שונים מהשמות הישנים באקסל לפרויקטים האלה. Play now פותח `<dialog>` עם iframe; לבדוק לכל משחק אם itch.io / Unity Play מתירים הטמעה, ואם לא - קישור החוצה. ChessLord: Download (Windows) לדף הנחיתה. AI Capitalist: Android, In development.
 
 ### #5 About ויוקלילי - TODO
 **חלון היוקלילי (2026-11-22, בקשתו):** נסגר רק בכפתור Close וב-Esc (החלטתו), לא בלחיצה מחוץ לחלון, כי מנגנים ופורטים שם ולא רוצים שייסגר בטעות.
 **שינוי מ-v7 (2026-11-21, החלטתו):** ב-Then/Now התמונה העדכנית (הבוגרת) היא ברירת המחדל, וריחוף, פוקוס או הקשה חושפים את תמונת הילדות. צליל הקסם עולה כשהילדות נחשפת, ויורד ברכות כשחוזרים.
 נושאים: Music, Making games, Apps (רק highlights - נקבע כאן), AI talks, Excel and BI (AgriLab-PRO + Travian), Games I play ("I regret nothing.", Steam/Epic/Discord). הרמז ליוקלילי בנושא Music.
+
+### #9 צ'קליסט נכסים מעודכן - TODO
+נפתח (2026-11-22) לבקשתו: לעדכן את `נכסים וטקסטים לאתר.xlsx` או להכין חדש, "ברגע שנדע בדיוק מה צריך" - כלומר אחרי #5, כשכל מקומות התמונה והטקסט קיימים באתר. הצעה: סקריפט קריאה של קובצי התוכן (`src/content`, `src/data`) שמפיק קובץ **חדש** לצד הישן (לא כותב על הישן), עם מצב "יש" לכל קובץ שכבר נמצא ב-`src/assets/images/`. הוא מריץ. לפני כתיבה: לוודא שאין קובץ `~$` (פתוח באקסל).
 
 ### #6 SEO ונגישות - TODO
 `@astrojs/sitemap` מותקן כאן. סטטיסטיקות: פתוח, ברירת המחדל בלי.

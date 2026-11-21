@@ -10,6 +10,9 @@ const shot = z.object({
   kind: z.enum(['photo', 'screen']),
 });
 
+/** A game inside the window: an embed page and the game's own size (sets the window's shape). */
+const embed = z.object({ url: z.url(), width: z.number().int().positive(), height: z.number().int().positive() });
+
 /** A project page: one Markdown file per project. The body is the "About" text (step 4). */
 const projects = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/projects' }),
@@ -32,9 +35,9 @@ const projects = defineCollection({
     /** what Play opens: a game in a window, the Windows download page, or a song player */
     play: z.enum(['window', 'download', 'song']).optional(),
     /** the game inside the window: an official embed page and the game's own size */
-    embed: z
-      .object({ url: z.url(), width: z.number().int().positive(), height: z.number().int().positive() })
-      .optional(),
+    embed: embed.optional(),
+    /** a second Play button, for an extra playable version (ChessLord's early version) */
+    demo: z.object({ label: z.string(), link: z.url(), embed }).optional(),
     hero: shot,
     gallery: z.array(shot).default([]),
   }).refine((p) => p.summary || p.summaryTodo, { message: 'Give a summary, or a summaryTodo saying what to write' })
