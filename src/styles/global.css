@@ -1,1 +1,114 @@
 @import "tailwindcss";
+
+/* Colors from mockup v7. Dark is the default; light only through the toggle (data-theme="light"). */
+:root {
+  --paper: #141b26;
+  --raise: #1a2330;
+  --cloud: #212b3a;
+  --ink: #e9eef5;
+  --soft: #9aa8bb;
+  --rule: #2b3646;
+  --link: #8dbbff;
+  --sun: #f2bd45;
+  --berry: #ec6f95;
+  --sky: #5ba5ee;
+  --grass: #54c174;
+  --plum: #a98bf0;
+  --on-sun: #141b26;
+  --on-berry: #141b26;
+  --on-sky: #141b26;
+  --on-grass: #141b26;
+  --on-plum: #141b26;
+  --live: #6fd08d;
+  --dev: #f2c45a;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --paper: #ffffff;
+  --raise: #f6f8fb;
+  --cloud: #eef2f7;
+  --ink: #22304a;
+  --soft: #5a6780;
+  --rule: #dde4ee;
+  --link: #2a6fc4;
+  --sun: #f3b62c;
+  --berry: #de4f7a;
+  --sky: #3a8fdc;
+  --grass: #38a657;
+  --plum: #7d5cd6;
+  --on-sun: #22304a;
+  --on-berry: #ffffff;
+  --on-sky: #ffffff;
+  --on-grass: #ffffff;
+  --on-plum: #ffffff;
+  --live: #24803f;
+  --dev: #9a6a00;
+  color-scheme: light;
+}
+
+@theme inline {
+  --font-sans: var(--font-rubik), system-ui, sans-serif;
+  --color-paper: var(--paper);
+  --color-raise: var(--raise);
+  --color-cloud: var(--cloud);
+  --color-ink: var(--ink);
+  --color-soft: var(--soft);
+  --color-rule: var(--rule);
+  --color-link: var(--link);
+  --color-sun: var(--sun);
+  --color-berry: var(--berry);
+  --color-sky: var(--sky);
+  --color-grass: var(--grass);
+  --color-plum: var(--plum);
+  --color-live: var(--live);
+  --color-dev: var(--dev);
+  /* the door color of the current element, set by the k-* classes below */
+  --color-door: var(--c, var(--ink));
+  --color-on-door: var(--c-on, var(--paper));
+}
+
+@theme {
+  /* the mockup switches tabs to the Hotbar under 700px */
+  --breakpoint-nav: 43.75rem;
+}
+
+/* door colors: Music berry, Games sun, Apps sky, About plum, Home grass */
+.k-music { --c: var(--berry); --c-on: var(--on-berry); }
+.k-games { --c: var(--sun); --c-on: var(--on-sun); }
+.k-apps { --c: var(--sky); --c-on: var(--on-sky); }
+.k-about { --c: var(--plum); --c-on: var(--on-plum); }
+.k-home { --c: var(--grass); --c-on: var(--on-grass); }
+
+@layer base {
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15.5px;
+    line-height: 1.55;
+  }
+  :focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+  }
+}
+
+/* sticky header shrinks a little once the page scrolls */
+.site-top.stuck { box-shadow: 0 10px 24px -16px rgb(0 0 0 / 0.75); }
+.site-top.stuck .site-header { padding-block: 8px; }
+
+/* toggle icons follow the state in CSS, so they are right on first paint */
+[data-sound-toggle] [data-when],
+[data-theme-toggle] [data-when] { display: contents; }
+[data-sound-toggle][aria-pressed="true"] [data-when="off"],
+[data-sound-toggle]:not([aria-pressed="true"]) [data-when="on"],
+:root:not([data-theme="light"]) [data-theme-toggle] [data-when="light"],
+:root[data-theme="light"] [data-theme-toggle] [data-when="dark"] { display: none; }
+
+/* Surprise me: the dice rolls before the random page opens */
+.dice.rolling svg { animation: dice-roll 0.65s cubic-bezier(0.3, 0.6, 0.3, 1); }
+@keyframes dice-roll { to { transform: rotate(720deg) scale(1.15); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dice.rolling svg { animation: none; }
+}

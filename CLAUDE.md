@@ -28,7 +28,8 @@ Layer 2 for this project (`F:\Projects\Web` has no domain CLAUDE.md). `C:\Users\
 
 ## Design rules (from v7)
 - Dark by default, light toggle, remembered per visitor, no flash on load.
-- Font: Rubik, self-hosted files in the repo (no Google Fonts link, no font package).
+- Font: Rubik through Astro's built-in Fonts API (`fontProviders.fontsource()`, latin + hebrew, variable 400-800). Files are downloaded at build time and served from the site itself: no Google Fonts link, no font package. The build needs internet.
+- Theme: always dark on the first visit (the OS setting is ignored), light only by the toggle.
 - Colors: the v7 tokens (paper/raise/cloud/ink/soft/rule + sun/berry/sky/grass/plum). Door colors: Music berry, Games sun, Apps sky, About plum.
 - Nav: desktop = tabs in a sticky header; phone = bottom Hotbar. No breadcrumbs. No sideways scroll on phone.
 - Motion: varied entrance motion once per view, transform/opacity only, no `transition: all`. Hover effects only under `(hover: hover) and (pointer: fine)`. Honor `prefers-reduced-motion`.

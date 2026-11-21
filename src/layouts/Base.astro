@@ -1,0 +1,66 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import { Font } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Hotbar from '../components/Hotbar.astro';
+import Footer from '../components/Footer.astro';
+import { navKeyOf } from '../lib/nav';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Assaf Elad, also known as Bussuf: music, games I made, and apps I built.' } = Astro.props;
+const current = navKeyOf(Astro.url.pathname);
+const pageTitle = current === 'home' ? title : `${title} | Assaf Elad`;
+---
+
+<!-- No cross-page animation: it made fast tab switching wait. Pages get their own entrance motion instead. -->
+<html lang="en" dir="ltr" transition:animate="none">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <Font cssVariable="--font-rubik" preload={[{ subset: 'latin' }]} />
+    <!-- Before first paint: dark unless the visitor chose light. Re-applied after every page swap. -->
+    <script is:inline>
+      (() => {
+        const apply = () => {
+          let theme = 'dark';
+          try {
+            if (localStorage.getItem('assaf-theme') === 'light') theme = 'light';
+          } catch {}
+          document.documentElement.dataset.theme = theme;
+        };
+        apply();
+        if (!window.__assafTheme) {
+          window.__assafTheme = true;
+          document.addEventListener('astro:after-swap', apply);
+        }
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body class="flex min-h-screen flex-col font-sans">
+    <a
+      href="#main"
+      class="sr-only z-20 rounded-md bg-raise px-3 py-2 text-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      data-sound="none">Skip to content</a
+    >
+    <Header current={current} />
+    <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 nav:px-7 nav:pb-10">
+      <slot />
+    </main>
+    <Footer />
+    <Hotbar current={current} />
+    <script>
+      import '../scripts/ui';
+    </script>
+  </body>
+</html>

@@ -1,19 +1,12 @@
 ---
-import '../styles/global.css';
+import Base from '../layouts/Base.astro';
 ---
 
-<html lang="en" dir="ltr">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="color-scheme" content="dark" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Assaf Elad</title>
-	</head>
-	<!-- Step 1 placeholder: the real shell (layout, nav, theme) comes in step 2. -->
-	<body class="min-h-screen bg-[#141b26] text-[#e9eef5] grid place-items-center">
-		<h1 class="text-2xl font-bold">Assaf Elad</h1>
-	</body>
-</html>
+<Base title="Assaf Elad">
+  <!-- Temporary: the banner and the three doors come in step 3. -->
+  <section class="py-10">
+    <p class="mb-2.5 text-soft">Hi, I'm Assaf. Most of my friends call me Bussuf.</p>
+    <h1 class="text-[clamp(40px,7vw,72px)] leading-none font-extrabold tracking-tight">I play ___</h1>
+    <p class="mt-4 text-soft">[Home page: step 3]</p>
+  </section>
+</Base>

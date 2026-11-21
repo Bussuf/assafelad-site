@@ -1,0 +1,25 @@
+---
+const links = [
+  { label: 'Email', href: 'mailto:assaf@assafelad.com' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/assafelad/' },
+  { label: 'itch.io', href: 'https://bussuf.itch.io' },
+];
+---
+
+<footer class="border-t border-rule bg-raise">
+  <div class="mx-auto flex max-w-6xl flex-wrap justify-between gap-2.5 px-4 py-[18px] text-sm text-soft nav:px-7">
+    <span>
+      Assaf Elad, also known as Bussuf<br />
+      <small class="text-[12.5px] opacity-80">Built with Astro, coffee and too many hours of Factorio.</small>
+    </span>
+    <span class="flex gap-[18px]">
+      {
+        links.map((link) => (
+          <a href={link.href} class="font-medium text-ink hover:text-link" rel={link.href.startsWith('http') ? 'me noopener' : undefined}>
+            {link.label}
+          </a>
+        ))
+      }
+    </span>
+  </div>
+</footer>

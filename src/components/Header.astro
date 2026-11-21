@@ -1,0 +1,49 @@
+---
+import Icon from './Icon.astro';
+import { NAV, type NavKey } from '../lib/nav';
+
+interface Props {
+  current: NavKey;
+}
+
+const { current } = Astro.props;
+const tabs = NAV.filter((item) => item.key !== 'home');
+const tool =
+  'inline-flex items-center gap-1.5 rounded-md border border-rule px-[9px] py-[3px] text-sm text-soft hover:text-ink';
+---
+
+<div class="site-top sticky top-0 z-10 border-b border-rule bg-paper/90 backdrop-blur-md transition-shadow">
+  <header class="site-header mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3.5 transition-[padding] nav:px-7">
+    <a href="/" class="k-home flex items-center gap-2.5 text-lg font-bold text-ink" data-sound="chord">
+      <i class="inline-block size-4 rounded bg-door" aria-hidden="true"></i>Assaf Elad
+    </a>
+    <nav aria-label="Main" class="flex flex-wrap items-center gap-4 text-[14.5px] font-medium">
+      {
+        tabs.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              `k-${item.key} hidden py-0.5 nav:inline`,
+              current === item.key ? 'text-ink shadow-[0_2px_0_var(--color-door)]' : 'text-soft hover:text-ink',
+            ]}
+            aria-current={current === item.key ? 'page' : undefined}
+            data-sound={item.sound}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <button type="button" class:list={['dice', tool]} data-dice title="Open a random page">
+        <Icon name="dice" /><span class="hidden nav:inline" data-dice-label>Surprise me</span>
+      </button>
+      <button type="button" class={tool} data-sound-toggle aria-pressed="false" title="Sound effects">
+        <span data-when="off"><Icon name="soundOff" /><span class="hidden nav:inline">Sound off</span></span>
+        <span data-when="on"><Icon name="soundOn" /><span class="hidden nav:inline">Sound on</span></span>
+      </button>
+      <button type="button" class={tool} data-theme-toggle aria-label="Switch to light mode">
+        <span data-when="dark"><Icon name="sun" /></span>
+        <span data-when="light"><Icon name="moon" /></span>
+      </button>
+    </nav>
+  </header>
+</div>

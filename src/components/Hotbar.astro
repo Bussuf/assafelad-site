@@ -1,0 +1,37 @@
+---
+import Icon from './Icon.astro';
+import { NAV, type NavKey } from '../lib/nav';
+
+interface Props {
+  current: NavKey;
+}
+
+const { current } = Astro.props;
+---
+
+<!-- Phone navigation: a floating bar at the bottom, hidden from 700px up where the header tabs take over. -->
+<div class="pointer-events-none fixed inset-x-0 bottom-[calc(12px+env(safe-area-inset-bottom,0px))] z-10 flex justify-center nav:hidden">
+  <nav
+    aria-label="Main"
+    class="pointer-events-auto flex gap-[5px] rounded-xl border border-rule bg-paper/85 p-[5px] shadow-[0_10px_30px_-12px_rgb(0_0_0/0.6)] backdrop-blur-sm"
+  >
+    {
+      NAV.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            `k-${item.key} grid h-[52px] w-14 content-center justify-items-center gap-0.5 rounded-lg border text-[10.5px] transition-transform active:scale-95`,
+            current === item.key
+              ? 'border-door bg-[color-mix(in_srgb,var(--color-door)_16%,var(--color-raise))] text-ink [&_svg]:text-door'
+              : 'border-rule bg-raise text-soft',
+          ]}
+          aria-current={current === item.key ? 'page' : undefined}
+          data-sound={item.sound}
+        >
+          <Icon name={item.key} class="size-5" />
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
