@@ -8,7 +8,7 @@ const words = JSON.stringify(BANNER.map(({ word, color, caption }) => ({ word, c
 ---
 
 <section
-  class="banner grid items-center gap-[18px] pt-[26px] pb-[22px] nav:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] nav:gap-7 nav:pt-10 nav:pb-[34px]"
+  class="banner grid items-center gap-[18px] pt-[26px] pb-[22px] nav:grid-cols-[minmax(0,1fr)_auto] nav:gap-10 nav:pt-6 nav:pb-6"
   data-banner
   data-words={words}
   data-ms={WORD_MS}
@@ -98,6 +98,15 @@ const words = JSON.stringify(BANNER.map(({ word, color, caption }) => ({ word, c
     aspect-ratio: 3 / 2;
   }
   .collage > :global(.ph) { aspect-ratio: auto; height: 100%; min-height: 0; }
+  /* computer: the collage's height is capped so the banner and the doors fit one screen (#11) */
+  @media (min-width: 43.75rem) {
+    .collage {
+      --h: clamp(240px, calc(100dvh - 520px), 360px);
+      height: var(--h);
+      width: calc(var(--h) * 1.5);
+      aspect-ratio: auto;
+    }
+  }
   .collage > :global(.ph:first-child) { grid-row: span 2; }
   .collage.swap > :global(.ph:nth-child(1)) { animation: a-pop 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
   .collage.swap > :global(.ph:nth-child(2)) { animation: a-right 0.55s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) both; }

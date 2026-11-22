@@ -2,15 +2,13 @@
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import Placeholder from '../../components/Placeholder.astro';
 import TextTodo from '../../components/TextTodo.astro';
-import ProjectCard from '../../components/door/ProjectCard.astro';
 import PlayButton from '../../components/project/PlayButton.astro';
 import GameWindow from '../../components/project/GameWindow.astro';
 import ProjectSwitcher from '../../components/project/ProjectSwitcher.astro';
+import Gallery from '../../components/project/Gallery.astro';
 import { DOORS } from '../../data/home';
 import { allProjects, langOf, type Project } from '../../lib/projects';
-import { isTall } from '../../lib/images';
 
 export const getStaticPaths = (async () => {
   const projects = await allProjects();
@@ -27,8 +25,7 @@ interface Props {
 }
 
 const { project, siblings } = Astro.props;
-const related = siblings.filter((p) => p.id !== project.id);
-const { name, door, status, state, made, summary, summaryTodo, link, hero, gallery } = project.data;
+const { name, door, status, state, made, summary, summaryTodo, link } = project.data;
 const doorInfo = DOORS.find((d) => d.key === door)!;
 const music = door === 'music';
 const { Content } = await render(project);
@@ -36,92 +33,57 @@ const hasAbout = !!project.body?.trim();
 const aboutTodo = music
   ? { what: 'About: what it is, who it is for, how to join', words: 70 }
   : { what: 'About: what it is, why I made it, one thing I learned', words: 90 };
-const motions = ['right', 'pop', 'drop', 'up'];
-// Phone games (screenshots taller than wide): three tall cells side by side instead of wide ones.
-const tallGallery = gallery.length > 0 && gallery.every((g) => isTall(g.file));
 ---
 
+<!-- Version A (his pick, #11): on a computer the page fits one screen - the gallery viewer on the left takes the
+     height that is left, the information sits in a column on the right. On a phone they stack. -->
 <Base title={name} description={summary ?? `${name}: ${status}`}>
-  <div class={`k-${door} pb-10`}>
+  <div class={`k-${door} project`}>
     <ProjectSwitcher project={project} items={siblings} />
-    <div class="mt-3.5" data-a="zoom" style="--d:40ms">
-      <Placeholder caption={hero.caption} file={hero.file} kind={hero.kind} ratio="21:9" />
-    </div>
 
-    <div class="mt-[18px] mb-1.5 flex flex-wrap items-center justify-between gap-3">
-      <h1
-        class="m-0 flex items-center gap-3 text-[clamp(34px,6vw,56px)] leading-[1.08] font-extrabold tracking-[-0.015em] text-balance"
-        data-a="left"
-        style="--d:140ms"
-      >
-        <span class="h-[30px] w-3 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
-        <bdi lang={langOf(name)}>{name}</bdi>
-      </h1>
-      <span class="flex flex-wrap gap-2" data-a="pop" style="--d:280ms">
-        <PlayButton project={project} />
-        <PlayButton project={project} variant="demo" />
-      </span>
-    </div>
+    <div class="layout">
+      <Gallery project={project} class="gal" />
 
-    <div class="mt-1.5 mb-2.5 flex flex-wrap gap-2 text-sm" data-a="up" style="--d:220ms">
-      <a href={doorInfo.href} class="rounded-md border border-rule px-2.5 py-0.5 font-medium text-ink">{doorInfo.title}</a>
-      <span class:list={['st self-center', state]}>{status}</span>
-      <span class="rounded-md border border-rule px-2.5 py-0.5 text-soft">Made with <b class="font-medium text-ink">{made}</b></span>
-    </div>
+      <aside class="info" data-a="right" style="--d:120ms">
+        <div class="flex items-center gap-3">
+          <span class="h-[34px] w-3 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
+          <h1 class="m-0 text-[clamp(32px,3.4vw,44px)] leading-[1.05] font-extrabold tracking-[-0.015em] text-balance">
+            <bdi lang={langOf(name)}>{name}</bdi>
+          </h1>
+        </div>
 
-    {summary ? <p class="mb-4 max-w-[60ch] text-[17px] text-soft">{summary}</p> : <TextTodo what={summaryTodo!} words={20} lines={1} />}
+        <div class="flex flex-wrap gap-2 text-sm">
+          <a href={doorInfo.href} class="rounded-md border border-rule px-2.5 py-0.5 font-medium text-ink">{doorInfo.title}</a>
+          <span class:list={['st self-center', state]}>{status}</span>
+          <span class="rounded-md border border-rule px-2.5 py-0.5 text-soft">Made with <b class="font-medium text-ink">{made}</b></span>
+        </div>
 
-    <div class="grid items-start gap-7 nav:grid-cols-2">
-      <div data-a="up" style="--d:300ms">
-        <h2>About</h2>
-        {hasAbout ? <div class="about"><Content /></div> : <TextTodo what={aboutTodo.what} words={aboutTodo.words} lines={5} />}
-        <h2>{music ? 'Where to hear it' : 'Where to see it'}</h2>
-        <p>
+        <div class="flex flex-wrap gap-2 empty:hidden">
+          <PlayButton project={project} class="big" />
+          <PlayButton project={project} variant="demo" class="big" />
+        </div>
+
+        {summary ? <p class="lead">{summary}</p> : <TextTodo what={summaryTodo!} words={20} lines={1} />}
+
+        <div class="about">
+          {hasAbout ? <Content /> : <TextTodo what={aboutTodo.what} words={aboutTodo.words} lines={5} />}
+        </div>
+
+        <p class="where">
+          {music ? 'Where to hear it' : 'Where to see it'}:
           {
             project.data.private
-              ? 'A private system with real data. Shown as screenshots only.'
+              ? ' A private system with real data. Shown as screenshots only.'
               : link?.url
-                ? <a href={link.url} class="text-link underline underline-offset-2" target="_blank" rel="noopener">{link.label}</a>
+                ? <a href={link.url} class="text-link underline underline-offset-2" target="_blank" rel="noopener"> {link.label}</a>
                 : link
-                  ? link.label
-                  : '[Link coming.]'
+                  ? ` ${link.label}`
+                  : ' [Link coming.]'
           }
+          {siblings.length > 1 && <span class="keys"> · ← → flips between projects</span>}
         </p>
-      </div>
-      <div>
-        <h2>Gallery</h2>
-        {
-          tallGallery ? (
-            <div class="grid grid-cols-3 gap-2.5">
-              {gallery.slice(0, 3).map((g, i) => (
-                <div data-a={motions[i]} style={`--d:${320 + i * 90}ms`}>
-                  <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio="9:16" size="small" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div class="grid grid-cols-2 gap-2.5">
-              {gallery.slice(0, 4).map((g, i) => (
-                <div class:list={[{ 'col-span-2': i === 0 }]} data-a={motions[i]} style={`--d:${320 + i * 90}ms`}>
-                  <Placeholder caption={g.caption} file={g.file} kind={g.kind} ratio={i === 0 ? '16:9' : '4:3'} size="small" />
-                </div>
-              ))}
-            </div>
-          )
-        }
-      </div>
+      </aside>
     </div>
-
-    {
-      related.length > 0 && (
-        <>
-          <h2>More in {doorInfo.title}</h2>
-          <div class="grid grid-cols-2 gap-2.5 nav:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] nav:gap-3">
-            {related.map((p, i) => <ProjectCard project={p} compact motion="right" delay={420 + i * 60} />)}
-          </div>
-        </>
-      )
-    }
 
     <GameWindow project={project} />
     <GameWindow project={project} variant="demo" />
@@ -129,14 +91,28 @@ const tallGallery = gallery.length > 0 && gallery.every((g) => isTall(g.file));
 </Base>
 
 <style>
-  h2 {
-    margin: 26px 0 10px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--rule);
-    font-size: 20px;
-    font-weight: 600;
-  }
-  p,
-  .about :global(p) { margin: 0 0 10px; max-width: 64ch; }
+  /* minmax(0, 1fr): a big image must never widen the column past the screen */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 14px; }
+  .info { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+  .lead { margin: 0; font-size: 17px; color: var(--soft); max-width: 60ch; }
+  .about { border-top: 1px solid var(--rule); padding-top: 12px; font-size: 15px; line-height: 1.55; }
+  .about :global(p) { margin: 0 0 10px; }
   .about :global(strong) { font-weight: 600; }
+  .where { margin: 0; border-top: 1px solid var(--rule); padding-top: 12px; font-size: 14px; color: var(--soft); }
+  .keys { display: none; }
+  .info :global(.play-btn.big) { font-size: 15px; padding: 9px 18px 9px 14px; min-height: 44px; border-radius: 8px; }
+
+  /* computer: everything in one screen, footer included. ~56px header + ~70px project strip + ~60px footer + gaps. */
+  @media (min-width: 43.75rem) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr) 420px;
+      gap: 28px;
+      height: calc(100dvh - 222px);
+      min-height: 480px;
+    }
+    .layout :global(.gal) { min-height: 0; }
+    .info { overflow-y: auto; padding-right: 4px; }
+    .where { margin-top: auto; }
+    .keys { display: inline; }
+  }
 </style>

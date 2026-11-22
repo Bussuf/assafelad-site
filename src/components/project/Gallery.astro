@@ -1,0 +1,95 @@
+---
+import { Image } from 'astro:assets';
+import Placeholder from '../Placeholder.astro';
+import { findImage } from '../../lib/images';
+import type { Project } from '../../lib/projects';
+
+/* One big image and a row of thumbnails under it: a thumbnail swaps the big image in place, no scrolling.
+   The big image is shown whole (contain) on a blurred copy of itself, so any shape fits. */
+interface Props {
+  project: Project;
+  class?: string;
+}
+
+const { project, class: className } = Astro.props;
+const shots = [project.data.hero, ...project.data.gallery].slice(0, 6);
+---
+
+<section class:list={['viewer', className]} aria-label="Gallery" data-viewer>
+  <div class="stage">
+    {
+      shots.map((s, i) => {
+        const img = findImage(s.file);
+        return (
+          <figure class="slide" data-slide={i} hidden={i !== 0}>
+            {img ? (
+              <>
+                <Image src={img} alt="" width={Math.min(1280, img.width)} class="bg" aria-hidden="true" loading={i === 0 ? 'eager' : 'lazy'} />
+                <Image src={img} alt={s.caption} width={Math.min(1280, img.width)} class="fg" loading={i === 0 ? 'eager' : 'lazy'} />
+              </>
+            ) : (
+              <Placeholder caption={s.caption} file={s.file} kind={s.kind} ratio="16:9" class="fill" />
+            )}
+            <figcaption>{s.caption} · {i + 1} of {shots.length}</figcaption>
+          </figure>
+        );
+      })
+    }
+  </div>
+  {
+    shots.length > 1 && (
+      <div class="thumbs" role="group" aria-label="Choose an image">
+        {shots.map((s, i) => (
+          <button type="button" class="thumb" data-show={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={s.caption}>
+            <Placeholder caption={s.caption} file={s.file} kind={s.kind} ratio="4:3" size="tiny" />
+          </button>
+        ))}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .viewer { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+  .stage { position: relative; flex: 1; min-height: 260px; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: #0d121a; }
+  /* desktop: the stage takes the height that is left, so the page fits one screen */
+  @media (min-width: 43.75rem) {
+    .stage { aspect-ratio: auto; }
+  }
+  .slide { position: absolute; inset: 0; margin: 0; }
+  .slide :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .slide :global(img.bg) { object-fit: cover; filter: blur(26px) brightness(0.4); transform: scale(1.2); }
+  .slide :global(img.fg) { object-fit: contain; }
+  .slide :global(.fill) { position: absolute; inset: 0; aspect-ratio: auto; height: 100%; }
+  figcaption {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgb(13 18 26 / 0.8);
+    color: #e9eef5;
+    font-size: 13px;
+  }
+  .thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 96px)); gap: 8px; }
+  .thumb { padding: 0; border: 2px solid var(--rule); border-radius: 7px; overflow: hidden; background: #0d121a; }
+  .thumb[aria-pressed='true'] { border-color: var(--c); }
+  @media (hover: hover) and (pointer: fine) {
+    .thumb:hover { border-color: var(--c); }
+  }
+  @media (max-width: 43.74rem) {
+    .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+</style>
+
+<script>
+  /* Delegated, so it works after every page swap. */
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as Element).closest<HTMLElement>('[data-viewer] [data-show]');
+    if (!btn) return;
+    const viewer = btn.closest('[data-viewer]')!;
+    const n = btn.dataset.show;
+    viewer.querySelectorAll<HTMLElement>('[data-slide]').forEach((s) => (s.hidden = s.dataset.slide !== n));
+    viewer.querySelectorAll('[data-show]').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+  });
+</script>

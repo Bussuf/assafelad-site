@@ -94,6 +94,13 @@ const count = countLine(door.key, items);
     transition: opacity 0.35s, visibility 0.35s;
   }
   .peek { opacity: 0; visibility: hidden; }
+  /* computer: picture and "Start here" side by side, so the doors stay low and the home page fits one screen */
+  @media (min-width: 43.75rem) {
+    .rest { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: center; }
+    .peek { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); column-gap: 14px; align-content: center; }
+    .peek .count3 { grid-column: 1 / -1; }
+    .peek > small { display: none; }
+  }
   .door:focus-within .rest,
   .door.open .rest { opacity: 0; visibility: hidden; }
   .door:focus-within .peek,
