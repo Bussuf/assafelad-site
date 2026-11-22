@@ -13,18 +13,15 @@ const { current } = Astro.props;
 <div class="pointer-events-none fixed inset-x-0 bottom-[calc(12px+env(safe-area-inset-bottom,0px))] z-10 flex justify-center nav:hidden">
   <nav
     aria-label="Main"
-    class="hotbar pointer-events-auto flex gap-[5px] rounded-2xl bg-cloud p-1.5"
+    class="hotbar pointer-events-auto flex gap-[5px] rounded-2xl p-1.5"
   >
     {
       NAV.map((item) => (
         <a
           href={item.href}
           class:list={[
-            `k-${item.key} grid h-[54px] w-[58px] content-center justify-items-center gap-0.5 rounded-xl border text-[11px] font-medium transition-transform active:scale-95`,
-            // every slot shows its door color, so the bar reads as the site's controls, not as page content
-            current === item.key
-              ? 'border-door bg-door text-[var(--c-on)]'
-              : 'border-rule bg-raise text-ink [&_svg]:text-door',
+            `slot k-${item.key} grid h-[54px] w-[58px] content-center justify-items-center gap-0.5 rounded-xl bg-door text-[11px] font-semibold text-[var(--c-on)] transition-transform active:scale-95`,
+            current === item.key && 'here',
           ]}
           aria-current={current === item.key ? 'page' : undefined}
           data-sound={item.sound}
@@ -39,9 +36,18 @@ const { current } = Astro.props;
 </div>
 
 <style>
-  /* stands apart from the page: lighter than the content, a clear edge and a deep shadow */
+  /* Option C (his pick): an inverted frame - the ink color, light on the dark theme and dark on the light one -
+     with every slot filled in its door color, so the bar never blends into the page. */
   .hotbar {
-    border: 1.5px solid color-mix(in srgb, var(--ink) 28%, transparent);
-    box-shadow: 0 14px 34px -8px rgb(0 0 0 / 0.75), 0 0 0 4px color-mix(in srgb, var(--paper) 70%, transparent);
+    background: var(--ink);
+    box-shadow: 0 14px 34px -8px rgb(0 0 0 / 0.6), 0 0 0 3px color-mix(in srgb, var(--paper) 80%, transparent);
   }
+  .slot { opacity: 0.82; }
+  /* where you are: full color, lifted, with a ring in the page color */
+  .slot.here {
+    opacity: 1;
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 2.5px var(--paper), 0 0 0 4.5px var(--c);
+  }
+  .slot.here:active { transform: translateY(-4px) scale(0.95); }
 </style>
