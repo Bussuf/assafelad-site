@@ -12,6 +12,9 @@ export default defineConfig({
   // CSS goes inside each page: a page cached from before a deploy never points at a CSS file that is gone
   // (pages loaded unstyled right after a push, his note)
   build: { inlineStylesheets: 'always' },
+  // every link on screen is fetched ahead (pages are ~20KB): a phone has no hover, and the wait for
+  // GitHub Pages made each Hotbar tap take ~2s (his note)
+  prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
   base: /** @type {any} */ (globalThis).process?.env?.SITE_BASE || '/',
   // Rubik is downloaded at build time and served from the site itself (no Google Fonts link).
   fonts: [
