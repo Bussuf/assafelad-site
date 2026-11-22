@@ -250,7 +250,9 @@ const btn = 'justify-self-start inline-flex items-center gap-1.5 rounded-md bord
       if (focus) tab.focus();
       // on a phone the panel sits under the tiles: bring it into view
       if (!matchMedia('(min-width: 43.75rem)').matches) {
-        root.querySelector(`[data-topic-panel="${tab.dataset.topic}"]`)?.scrollIntoView({ block: 'start' });
+        // a smooth scroll shows where the content went (a jump felt like a page change)
+        const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        root.querySelector(`[data-topic-panel="${tab.dataset.topic}"]`)?.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
       }
     };
 

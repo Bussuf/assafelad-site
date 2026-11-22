@@ -83,7 +83,7 @@ export const DOORS: readonly Door[] = [
   },
   {
     key: 'games',
-    title: 'Play games',
+    title: 'Games',
     sub: 'Games I made in Unity',
     intro: 'Games I made in Unity, from small classics to ChessLord.',
     href: '/games',
