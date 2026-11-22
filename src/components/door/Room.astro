@@ -1,0 +1,204 @@
+---
+import { render } from 'astro:content';
+import Icon from '../Icon.astro';
+import Placeholder from '../Placeholder.astro';
+import TextTodo from '../TextTodo.astro';
+import Gallery from '../project/Gallery.astro';
+import PlayButton from '../project/PlayButton.astro';
+import GameWindow from '../project/GameWindow.astro';
+import ProjectSwitcher from '../project/ProjectSwitcher.astro';
+import { DOORS } from '../../data/home';
+import { countLine, langOf, projectHref, projectsOf, type DoorKey, type Project } from '../../lib/projects';
+
+/* A door is a "room" (his design, #12): on a computer three columns in one screen - the door, every project as a
+   button, and the selected project. /games lands on the first project; each project keeps its own address.
+   On a phone it is two levels: /games is the list, /games/simon is the project (title and tags first). */
+interface Props {
+  door: DoorKey;
+  /** the project page; none = the door's own page (/games) */
+  project?: Project;
+}
+
+const { door } = Astro.props;
+const mode = Astro.props.project ? 'project' : 'index';
+const doorInfo = DOORS.find((d) => d.key === door)!;
+const items = await projectsOf(door);
+const current = Astro.props.project ?? items[0]!;
+const { name, status, state, made, summary, summaryTodo, link } = current.data;
+const music = door === 'music';
+const { Content } = await render(current);
+const hasAbout = !!current.body?.trim();
+const aboutTodo = music
+  ? { what: 'About: what it is, who it is for, how to join', words: 70 }
+  : { what: 'About: what it is, why I made it, one thing I learned', words: 90 };
+---
+
+<div class={`k-${door} room`} data-mode={mode}>
+  <section class="intro">
+    <span class="inline-flex items-center gap-2 text-[15px] font-semibold text-door" data-a="left">
+      <Icon name={door} class="size-[22px]" />{countLine(door, items)}
+    </span>
+    {
+      mode === 'index' ? (
+        <h1 class="door-title" data-a="left" style="--d:60ms">{doorInfo.title}</h1>
+      ) : (
+        <a href={doorInfo.href} class="door-title" data-a="left" style="--d:60ms">{doorInfo.title}</a>
+      )
+    }
+    <p class="m-0 text-base leading-normal text-soft" data-a="up" style="--d:120ms">{doorInfo.intro}</p>
+    <div class="cover" data-a="zoom" style="--d:80ms">
+      <Placeholder caption={doorInfo.cover.caption} file={doorInfo.cover.file} kind={doorInfo.cover.kind} ratio="16:9" size="small" />
+    </div>
+    <p class="keys">↑ ↓ or ← → move between {music ? 'pages' : door === 'games' ? 'games' : 'projects'}</p>
+  </section>
+
+  <nav class="list" aria-label={doorInfo.title}>
+    {
+      items.map((p, i) => (
+        <a
+          href={projectHref(p)}
+          class="item"
+          aria-current={p.id === current.id ? 'page' : undefined}
+          data-a="right"
+          style={`--d:${100 + i * 50}ms`}
+        >
+          <span class="thumb">
+            <Placeholder caption={p.data.hero.caption} file={p.data.hero.file} kind={p.data.hero.kind} ratio="4:3" size="tiny" />
+          </span>
+          <span class="txt">
+            <b><bdi lang={langOf(p.data.name)}>{p.data.name}</bdi></b>
+            <span class:list={['st', p.data.state]}>{p.data.status}</span>
+          </span>
+          <span class="chev" aria-hidden="true">›</span>
+        </a>
+      ))
+    }
+  </nav>
+
+  <article class="panel" aria-labelledby="project-title">
+    <header class="phead">
+      <div class="flex items-center gap-3">
+        <span class="h-[30px] w-2.5 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
+        {
+          mode === 'project' ? (
+            <h1 id="project-title" class="ptitle"><bdi lang={langOf(name)}>{name}</bdi></h1>
+          ) : (
+            <h2 id="project-title" class="ptitle"><bdi lang={langOf(name)}>{name}</bdi></h2>
+          )
+        }
+      </div>
+      <div class="flex flex-wrap gap-2 text-sm">
+        <span class:list={['st self-center', state]}>{status}</span>
+        <span class="rounded-md border border-rule px-2.5 py-0.5 text-soft">Made with <b class="font-medium text-ink">{made}</b></span>
+      </div>
+    </header>
+
+    <div class="pager-slot"><ProjectSwitcher project={current} items={items} /></div>
+
+    <Gallery project={current} class="gal" />
+
+    <div class="info">
+      <div class="flex flex-wrap gap-2 empty:hidden">
+        <PlayButton project={current} class="big" />
+        <PlayButton project={current} variant="demo" class="big" />
+      </div>
+      {summary ? <p class="lead">{summary}</p> : <TextTodo what={summaryTodo!} words={20} lines={1} />}
+      <div class="about">
+        {hasAbout ? <Content /> : <TextTodo what={aboutTodo.what} words={aboutTodo.words} lines={5} />}
+      </div>
+      <p class="where">
+        {music ? 'Where to hear it' : 'Where to see it'}:
+        {
+          current.data.private
+            ? ' A private system with real data. Shown as screenshots only.'
+            : link?.url
+              ? <a href={link.url} class="text-link underline underline-offset-2" target="_blank" rel="noopener"> {link.label}</a>
+              : link
+                ? ` ${link.label}`
+                : ' [Link coming.]'
+        }
+      </p>
+    </div>
+  </article>
+
+  <GameWindow project={current} />
+  <GameWindow project={current} variant="demo" />
+</div>
+
+<style>
+  .room { display: flex; flex-direction: column; gap: 16px; padding-top: 16px; }
+  .intro { display: flex; flex-direction: column; gap: 10px; }
+  .door-title { margin: 0; font-size: clamp(34px, 4.2vw, 52px); line-height: 1.02; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); }
+  .cover, .keys { display: none; }
+
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid var(--rule);
+    border-radius: 9px;
+    background: var(--raise);
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+  .txt b { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .chev { color: var(--c); font-size: 20px; }
+  .item[aria-current='page'] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--raise)); }
+  @media (hover: hover) and (pointer: fine) {
+    .item:hover { border-color: var(--c); }
+  }
+
+  .panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .phead { display: flex; flex-direction: column; gap: 8px; }
+  .ptitle { margin: 0; font-size: clamp(28px, 3vw, 40px); line-height: 1.05; font-weight: 800; letter-spacing: -0.015em; }
+  .info { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+  .lead { margin: 0; font-size: 16.5px; color: var(--soft); }
+  .about { border-top: 1px solid var(--rule); padding-top: 12px; font-size: 15px; line-height: 1.55; }
+  .about :global(p) { margin: 0 0 10px; }
+  .about :global(strong) { font-weight: 600; }
+  .where { margin: 0; border-top: 1px solid var(--rule); padding-top: 12px; font-size: 14px; color: var(--soft); }
+  .info :global(.play-btn.big) { font-size: 15px; padding: 9px 18px 9px 14px; min-height: 44px; border-radius: 8px; }
+
+  /* phone: the door page is the list; a project page is the project (title, tags, flip bar, gallery, Play, text) */
+  @media (max-width: 43.74rem) {
+    .room[data-mode='index'] .panel { display: none; }
+    .room[data-mode='project'] .intro,
+    .room[data-mode='project'] .list { display: none; }
+    .info :global(.play-btn.big) { width: 100%; justify-content: center; }
+  }
+
+  /* computer: three columns in one screen, like About */
+  @media (min-width: 43.75rem) {
+    .room {
+      display: grid;
+      grid-template-columns: 240px 250px minmax(0, 1fr);
+      gap: 24px;
+      height: calc(100dvh - 160px);
+      min-height: 520px;
+      padding-top: 18px;
+    }
+    .room .item .chev { display: none; }
+    .item { grid-template-columns: 54px minmax(0, 1fr); min-height: 0; }
+    .cover { display: block; margin-top: 4px; }
+    .keys { display: block; margin: auto 0 0; font-size: 12.5px; color: var(--soft); }
+    .list { overflow-y: auto; min-height: 0; padding: 2px; }
+    .pager-slot { display: none; }
+    .panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-areas: 'gal head' 'gal info';
+      column-gap: 22px;
+      row-gap: 12px;
+      min-height: 0;
+    }
+    .phead { grid-area: head; }
+    .panel :global(.gal) { grid-area: gal; min-height: 0; }
+    .info { grid-area: info; overflow-y: auto; padding-right: 4px; }
+    .where { margin-top: auto; }
+  }
+</style>

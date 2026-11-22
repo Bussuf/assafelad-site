@@ -1,118 +1,22 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import TextTodo from '../../components/TextTodo.astro';
-import PlayButton from '../../components/project/PlayButton.astro';
-import GameWindow from '../../components/project/GameWindow.astro';
-import ProjectSwitcher from '../../components/project/ProjectSwitcher.astro';
-import Gallery from '../../components/project/Gallery.astro';
-import { DOORS } from '../../data/home';
-import { allProjects, langOf, type Project } from '../../lib/projects';
+import Room from '../../components/door/Room.astro';
+import { allProjects, type Project } from '../../lib/projects';
 
 export const getStaticPaths = (async () => {
   const projects = await allProjects();
-  return projects.map((project) => ({
-    params: { door: project.data.door, slug: project.id },
-    props: { project, siblings: projects.filter((p) => p.data.door === project.data.door) },
-  }));
+  return projects.map((project) => ({ params: { door: project.data.door, slug: project.id }, props: { project } }));
 }) satisfies GetStaticPaths;
 
 interface Props {
   project: Project;
-  /** every project in this door, in door order */
-  siblings: Project[];
 }
 
-const { project, siblings } = Astro.props;
-const { name, door, status, state, made, summary, summaryTodo, link } = project.data;
-const doorInfo = DOORS.find((d) => d.key === door)!;
-const music = door === 'music';
-const { Content } = await render(project);
-const hasAbout = !!project.body?.trim();
-const aboutTodo = music
-  ? { what: 'About: what it is, who it is for, how to join', words: 70 }
-  : { what: 'About: what it is, why I made it, one thing I learned', words: 90 };
+const { project } = Astro.props;
 ---
 
-<!-- Version A (his pick, #11): on a computer the page fits one screen - the gallery viewer on the left takes the
-     height that is left, the information sits in a column on the right. On a phone they stack. -->
-<Base title={name} description={summary ?? `${name}: ${status}`}>
-  <div class={`k-${door} project`}>
-    <ProjectSwitcher project={project} items={siblings} />
-
-    <div class="layout">
-      <Gallery project={project} class="gal" />
-
-      <aside class="info" data-a="right" style="--d:120ms">
-        <div class="flex items-center gap-3">
-          <span class="h-[34px] w-3 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
-          <h1 class="m-0 text-[clamp(32px,3.4vw,44px)] leading-[1.05] font-extrabold tracking-[-0.015em] text-balance">
-            <bdi lang={langOf(name)}>{name}</bdi>
-          </h1>
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-sm">
-          <a href={doorInfo.href} class="rounded-md border border-rule px-2.5 py-0.5 font-medium text-ink">{doorInfo.title}</a>
-          <span class:list={['st self-center', state]}>{status}</span>
-          <span class="rounded-md border border-rule px-2.5 py-0.5 text-soft">Made with <b class="font-medium text-ink">{made}</b></span>
-        </div>
-
-        <div class="flex flex-wrap gap-2 empty:hidden">
-          <PlayButton project={project} class="big" />
-          <PlayButton project={project} variant="demo" class="big" />
-        </div>
-
-        {summary ? <p class="lead">{summary}</p> : <TextTodo what={summaryTodo!} words={20} lines={1} />}
-
-        <div class="about">
-          {hasAbout ? <Content /> : <TextTodo what={aboutTodo.what} words={aboutTodo.words} lines={5} />}
-        </div>
-
-        <p class="where">
-          {music ? 'Where to hear it' : 'Where to see it'}:
-          {
-            project.data.private
-              ? ' A private system with real data. Shown as screenshots only.'
-              : link?.url
-                ? <a href={link.url} class="text-link underline underline-offset-2" target="_blank" rel="noopener"> {link.label}</a>
-                : link
-                  ? ` ${link.label}`
-                  : ' [Link coming.]'
-          }
-          {siblings.length > 1 && <span class="keys"> · ← → flips between projects</span>}
-        </p>
-      </aside>
-    </div>
-
-    <GameWindow project={project} />
-    <GameWindow project={project} variant="demo" />
-  </div>
+<!-- A project inside its door's room (#12). -->
+<Base title={project.data.name} description={project.data.summary ?? `${project.data.name}: ${project.data.status}`}>
+  <Room door={project.data.door} project={project} />
 </Base>
-
-<style>
-  /* minmax(0, 1fr): a big image must never widen the column past the screen */
-  .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 14px; }
-  .info { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
-  .lead { margin: 0; font-size: 17px; color: var(--soft); max-width: 60ch; }
-  .about { border-top: 1px solid var(--rule); padding-top: 12px; font-size: 15px; line-height: 1.55; }
-  .about :global(p) { margin: 0 0 10px; }
-  .about :global(strong) { font-weight: 600; }
-  .where { margin: 0; border-top: 1px solid var(--rule); padding-top: 12px; font-size: 14px; color: var(--soft); }
-  .keys { display: none; }
-  .info :global(.play-btn.big) { font-size: 15px; padding: 9px 18px 9px 14px; min-height: 44px; border-radius: 8px; }
-
-  /* computer: everything in one screen, footer included. ~56px header + ~70px project strip + ~60px footer + gaps. */
-  @media (min-width: 43.75rem) {
-    .layout {
-      grid-template-columns: minmax(0, 1fr) 420px;
-      gap: 28px;
-      height: calc(100dvh - 222px);
-      min-height: 480px;
-    }
-    .layout :global(.gal) { min-height: 0; }
-    .info { overflow-y: auto; padding-right: 4px; }
-    .where { margin-top: auto; }
-    .keys { display: inline; }
-  }
-</style>

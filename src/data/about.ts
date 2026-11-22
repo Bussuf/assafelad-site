@@ -32,8 +32,9 @@ export interface Topic {
 }
 
 export const INTRO = {
-  then: { caption: 'Then: me at my first computer, 1992', file: 'about-01.png', kind: 'photo' } as Shot,
-  /** a pool: each visit shows one of these at random (his idea, #12) */
+  /** pools: every reveal brings the next photo, so one visit plays through all of them (his idea, #12).
+      More childhood photos go here as he finds them. */
+  then: [{ caption: 'Then: me at my first computer, 1992', file: 'about-01.png', kind: 'photo' }] as Shot[],
   now: [
     { caption: 'Now: me at the Acropolis', file: 'about-02.jpg', kind: 'photo' },
     { caption: 'Now: me at my desk', file: 'about-02-2.jpg', kind: 'photo' },

@@ -86,6 +86,12 @@
 .k-play { --c: var(--sun); --c-on: var(--on-sun); }
 
 @layer base {
+  /* An entrance animation that slides in from the side must never widen the page: on a phone that zoomed the
+     page out and pushed the Hotbar below the screen (bug on About). clip, not hidden, so sticky still works. */
+  html,
+  body {
+    overflow-x: clip;
+  }
   body {
     background: var(--paper);
     color: var(--ink);

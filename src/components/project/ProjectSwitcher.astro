@@ -1,10 +1,8 @@
 ---
-import Placeholder from '../Placeholder.astro';
 import { langOf, projectHref, type Project } from '../../lib/projects';
 
-/* Flip between the projects of one door without scrolling to "More in".
-   Desktop: a strip of every project in the door, the current one marked, plus the arrow keys.
-   Phone: ‹ previous · N of M · next ›. Wraps around: after the last comes the first. */
+/* Flip between the projects of one door. Phone: ‹ previous · N of M · next › (the room hides it on a computer,
+   where the project list sits beside the project). Arrow keys flip on both. Wraps around. */
 interface Props {
   project: Project;
   /** every project in this door, in door order (including the current one) */
@@ -20,18 +18,6 @@ const next = items[(i + 1) % items.length]!;
 {
   items.length > 1 && (
     <nav aria-label="Projects in this section" class="switcher" data-switcher>
-      <ol class="strip" style={`--n:${items.length}`}>
-        {items.map((p) => (
-          <li>
-            <a href={projectHref(p)} class="item" title={p.data.name} aria-current={p.id === project.id ? 'page' : undefined}>
-              <span class="thumb">
-                <Placeholder caption={p.data.hero.caption} file={p.data.hero.file} kind={p.data.hero.kind} ratio="4:3" size="tiny" />
-              </span>
-              <bdi lang={langOf(p.data.name)}>{p.data.name}</bdi>
-            </a>
-          </li>
-        ))}
-      </ol>
       <div class="pager">
         <a href={projectHref(prev)} class="pg" rel="prev" data-prev>
           <span aria-hidden="true">‹</span>
@@ -52,7 +38,7 @@ const next = items[(i + 1) % items.length]!;
 }
 
 <style>
-  .switcher { padding-top: 14px; }
+  .switcher { padding-top: 2px; }
 
   /* desktop strip */
   .strip {
@@ -113,10 +99,6 @@ const next = items[(i + 1) % items.length]!;
   .pg.next { justify-content: flex-end; text-align: right; }
   .pos { font-size: 12.5px; color: var(--soft); white-space: nowrap; }
 
-  @media (min-width: 43.75rem) {
-    .strip { display: grid; }
-    .pager { display: none; }
-  }
 </style>
 
 <script>
@@ -126,12 +108,15 @@ const next = items[(i + 1) % items.length]!;
   /* ← → flip between projects on a project page. Not while a window is open, not with modifier keys,
      and not when focus is in a field or a tab list (those use the arrows themselves). */
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.defaultPrevented) return;
     if (document.querySelector('dialog[open]')) return;
     const t = e.target as Element;
     if (t.closest('input, textarea, select, [contenteditable], [role="tablist"], iframe')) return;
-    const link = document.querySelector<HTMLAnchorElement>(e.key === 'ArrowLeft' ? '[data-switcher] [data-prev]' : '[data-switcher] [data-next]');
+    // up/down only on a computer, where the list is a column; on a phone they keep scrolling the page
+    if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !matchMedia('(min-width: 43.75rem)').matches) return;
+    const back = e.key === 'ArrowLeft' || e.key === 'ArrowUp';
+    const link = document.querySelector<HTMLAnchorElement>(back ? '[data-switcher] [data-prev]' : '[data-switcher] [data-next]');
     if (!link) return;
     e.preventDefault();
     tap();

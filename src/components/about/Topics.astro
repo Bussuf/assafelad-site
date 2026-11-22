@@ -17,8 +17,8 @@ const runs = (text: string) => text.split(/([֐-׿][֐-׿ ]*[֐-׿]|[֐-׿])/);
 const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-md border border-door px-3 py-[3px] text-sm font-medium text-ink';
 ---
 
-<div class="topics grid items-start gap-6 nav:grid-cols-[270px_minmax(0,1fr)]" data-topics>
-  <div class="grid gap-2" role="tablist" aria-label="Topics" aria-orientation="vertical">
+<div class="topics grid items-start gap-6 nav:h-full nav:min-h-0 nav:grid-cols-[250px_minmax(0,1fr)] nav:items-stretch" data-topics>
+  <div class="grid content-start gap-2" role="tablist" aria-label="Topics" aria-orientation="vertical" id="topics-start">
     {
       TOPICS.map((t, i) => (
         <button
@@ -41,7 +41,7 @@ const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-
     }
   </div>
 
-  <div class="panels" data-a="right" style="--d:200ms">
+  <div class="panels nav:h-full nav:min-h-0" data-a="right" style="--d:200ms">
     {
       TOPICS.map((t, i) => {
         const items = t.door ? projects.filter((p) => p.data.door === t.door) : [];
@@ -138,6 +138,9 @@ const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-
 
               {t.todo && <TextTodo what={t.todo.what} words={t.todo.words} lines={2} />}
               {t.go && <a href={t.go.href} class={btn}>{t.go.label}</a>}
+              <a href="#topics-start" class="go-btn back-top" data-back-top>
+                ↑ All topics
+              </a>
               {t.hint && (
                 <p class="hint">
                   <Icon name="music" class="size-4 flex-none text-door" />
@@ -178,8 +181,24 @@ const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-
   }
 
   .detail { overflow: hidden; border: 1px solid var(--rule); border-radius: 8px; background: var(--raise); scroll-margin-top: 76px; }
+  /* phone only: a plain button back up to the topic list, at the end of each panel */
+  .back-top {
+    justify-self: stretch;
+    justify-content: center;
+    display: inline-flex;
+    margin-top: 4px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  /* computer: the panel fills the column and scrolls inside itself, so the page stays one screen */
   @media (min-width: 43.75rem) {
-    .detail { position: sticky; top: 76px; }
+    .detail:not([hidden]) { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+    .db { overflow-y: auto; min-height: 0; }
+    .back-top { display: none; }
   }
   .dh { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--c); color: var(--c-on); font-weight: 700; font-size: 19px; }
   .dh span { flex: 1; }
@@ -257,6 +276,13 @@ const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-
     };
 
     root.addEventListener('click', (e) => {
+      const back = (e.target as Element).closest('[data-back-top]');
+      if (back) {
+        e.preventDefault();
+        const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.getElementById('what-title')?.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+        return;
+      }
       const tab = (e.target as Element).closest<HTMLButtonElement>('[role="tab"]');
       if (tab && tab.getAttribute('aria-selected') !== 'true') select(tab, false);
     });

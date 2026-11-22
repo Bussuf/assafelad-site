@@ -21,7 +21,11 @@ const sparks = [
       <Placeholder caption={n.caption} file={n.file} kind={n.kind} ratio="4:5" class="now" data-now={String(i)} hidden={i !== 0} />
     ))
   }
-  <Placeholder caption={INTRO.then.caption} file={INTRO.then.file} kind={INTRO.then.kind} ratio="4:5" class="then" />
+  {
+    INTRO.then.map((t, i) => (
+      <Placeholder caption={t.caption} file={t.file} kind={t.kind} ratio="4:5" class="then" data-then={String(i)} hidden={i !== 0} />
+    ))
+  }
   {sparks.map(([x, y, d]) => <span class="spk" style={`--x:${x}%;--y:${y}%;--sd:${d}s`} aria-hidden="true" />)}
   <span class="tnl" aria-hidden="true"><span class="l-now">Now</span><span class="l-then">Then</span></span>
 </div>
@@ -92,12 +96,27 @@ const sparks = [
 <script>
   import { magic } from '../../lib/sound';
 
-  /* Now is a pool: each visit to About shows one of the photos at random. */
+  /* Then and Now are pools. A visit starts on a random Now; every reveal of Then swaps the hidden Now to the next
+     photo, and every return to Now swaps the hidden Then - so playing with it walks through all the photos. */
+  const pool = (tn: Element, kind: 'now' | 'then') => [...tn.querySelectorAll<HTMLElement>(`[data-${kind}]`)];
+  function advance(tn: Element, kind: 'now' | 'then'): void {
+    const list = pool(tn, kind);
+    if (list.length < 2) return;
+    const at = list.findIndex((el) => !el.hidden);
+    // wait until the cross-fade has hidden it, so the swap is never seen
+    setTimeout(() => list.forEach((el, i) => (el.hidden = i !== (at + 1) % list.length)), 850);
+  }
+  function revealed(tn: Element, up: boolean): void {
+    magic(up);
+    advance(tn, up ? 'now' : 'then');
+  }
+
   document.addEventListener('astro:page-load', () => {
-    const pool = [...document.querySelectorAll<HTMLElement>('[data-then-now] [data-now]')];
-    if (pool.length < 2) return;
-    const pick = Math.floor(Math.random() * pool.length);
-    pool.forEach((el, i) => (el.hidden = i !== pick));
+    const tn = document.querySelector('[data-then-now]');
+    if (!tn) return;
+    const list = pool(tn, 'now');
+    const pick = Math.floor(Math.random() * list.length);
+    list.forEach((el, i) => (el.hidden = i !== pick));
   });
 
   /* Delegated (survives page swaps). Mouse: hover. Keyboard: focus. Touch and pen: a tap toggles. */
@@ -106,22 +125,22 @@ const sparks = [
 
   document.addEventListener('mouseover', (e) => {
     const tn = isTn(e.target);
-    if (tn && finePointer() && !tn.contains(e.relatedTarget as Node | null)) magic(true);
+    if (tn && finePointer() && !tn.contains(e.relatedTarget as Node | null)) revealed(tn, true);
   });
   document.addEventListener('mouseout', (e) => {
     const tn = isTn(e.target);
-    if (tn && finePointer() && !tn.contains(e.relatedTarget as Node | null) && !tn.classList.contains('flip')) magic(false);
+    if (tn && finePointer() && !tn.contains(e.relatedTarget as Node | null) && !tn.classList.contains('flip')) revealed(tn, false);
   });
   document.addEventListener('pointerup', (e) => {
     if (e.pointerType === 'mouse') return;
     const tn = isTn(e.target);
-    if (tn) magic(tn.classList.toggle('flip'));
+    if (tn) revealed(tn, tn.classList.toggle('flip'));
   });
   document.addEventListener('focusin', (e) => {
     const tn = isTn(e.target);
     if (tn && tn === e.target && tn.matches(':focus-visible')) {
       tn.dataset.kb = '1';
-      magic(true);
+      revealed(tn, true);
     }
   });
   document.addEventListener('focusout', (e) => {
@@ -129,7 +148,7 @@ const sparks = [
     // only a keyboard focus revealed "then", so only its blur plays the way back
     if (tn && tn === e.target && tn.dataset.kb) {
       delete tn.dataset.kb;
-      if (!tn.classList.contains('flip')) magic(false);
+      if (!tn.classList.contains('flip')) revealed(tn, false);
     }
   });
 </script>
