@@ -12,7 +12,8 @@ interface Props {
 }
 
 const { project, class: className } = Astro.props;
-const shots = [project.data.hero, ...project.data.gallery].slice(0, 6);
+// every image of the project: the row of thumbnails scrolls sideways when they do not fit
+const shots = [project.data.hero, ...project.data.gallery];
 ---
 
 <section class:list={['viewer', className]} aria-label="Gallery" data-viewer>
@@ -38,12 +39,16 @@ const shots = [project.data.hero, ...project.data.gallery].slice(0, 6);
   </div>
   {
     shots.length > 1 && (
-      <div class="thumbs" role="group" aria-label="Choose an image">
-        {shots.map((s, i) => (
-          <button type="button" class="thumb" data-show={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={s.caption}>
-            <Placeholder caption={s.caption} file={s.file} kind={s.kind} ratio="4:3" size="tiny" />
-          </button>
-        ))}
+      <div class="strip" data-strip>
+        <button type="button" class="arrow" data-scroll="-1" aria-label="Earlier images" hidden>‹</button>
+        <div class="thumbs" role="group" aria-label="Choose an image" data-thumbs>
+          {shots.map((s, i) => (
+            <button type="button" class="thumb" data-show={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={s.caption}>
+              <Placeholder caption={s.caption} file={s.file} kind={s.kind} ratio="4:3" size="tiny" />
+            </button>
+          ))}
+        </div>
+        <button type="button" class="arrow" data-scroll="1" aria-label="More images" hidden>›</button>
       </div>
     )
   }
@@ -71,25 +76,77 @@ const shots = [project.data.hero, ...project.data.gallery].slice(0, 6);
     color: #e9eef5;
     font-size: 13px;
   }
-  .thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 96px)); gap: 8px; }
-  .thumb { padding: 0; border: 2px solid var(--rule); border-radius: 7px; overflow: hidden; background: #0d121a; }
+  /* Always one row (his rule, #14): extra thumbnails scroll sideways with arrow buttons; no visible scrollbar. */
+  .strip { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .thumbs {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+  .thumbs::-webkit-scrollbar { display: none; }
+  .thumb { flex: none; width: 96px; scroll-snap-align: start; padding: 0; border: 2px solid var(--rule); border-radius: 7px; overflow: hidden; background: #0d121a; }
+  .arrow {
+    flex: none;
+    width: 36px;
+    align-self: stretch;
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    background: var(--raise);
+    color: var(--c);
+    font-size: 22px;
+    line-height: 1;
+  }
+  .arrow[hidden] { display: none; }
+  @media (hover: hover) and (pointer: fine) {
+    .arrow:hover { border-color: var(--c); }
+  }
   .thumb[aria-pressed='true'] { border-color: var(--c); }
   @media (hover: hover) and (pointer: fine) {
     .thumb:hover { border-color: var(--c); }
   }
   @media (max-width: 43.74rem) {
-    .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    /* a phone shows four at a time */
+    .thumb { width: calc((100% - 24px) / 4); }
+    .arrow { width: 40px; }
   }
 </style>
 
 <script>
+  /* The arrows show only when there are more thumbnails than fit, and only toward the hidden side. */
+  function syncArrows(strip: Element): void {
+    const row = strip.querySelector<HTMLElement>('[data-thumbs]')!;
+    const more = row.scrollWidth > row.clientWidth + 2;
+    const [back, fwd] = strip.querySelectorAll<HTMLElement>('[data-scroll]');
+    back!.hidden = !more || row.scrollLeft <= 2;
+    fwd!.hidden = !more || row.scrollLeft + row.clientWidth >= row.scrollWidth - 2;
+  }
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('[data-strip]').forEach((strip) => {
+      syncArrows(strip);
+      strip.querySelector('[data-thumbs]')!.addEventListener('scroll', () => syncArrows(strip), { passive: true });
+    });
+  });
+  addEventListener('resize', () => document.querySelectorAll('[data-strip]').forEach(syncArrows));
+
   /* Delegated, so it works after every page swap. */
   document.addEventListener('click', (e) => {
+    const arrow = (e.target as Element).closest<HTMLElement>('[data-strip] [data-scroll]');
+    if (arrow) {
+      const row = arrow.closest('[data-strip]')!.querySelector<HTMLElement>('[data-thumbs]')!;
+      row.scrollBy({ left: Number(arrow.dataset.scroll) * row.clientWidth * 0.8 });
+      return;
+    }
     const btn = (e.target as Element).closest<HTMLElement>('[data-viewer] [data-show]');
     if (!btn) return;
     const viewer = btn.closest('[data-viewer]')!;
     const n = btn.dataset.show;
     viewer.querySelectorAll<HTMLElement>('[data-slide]').forEach((s) => (s.hidden = s.dataset.slide !== n));
     viewer.querySelectorAll('[data-show]').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    btn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   });
 </script>
