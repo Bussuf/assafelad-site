@@ -1,4 +1,5 @@
 /* Home page copy and image slots, from mockup v7. File names follow the assets checklist (home-01 ... home-15). */
+import { withBase } from '../lib/nav';
 
 export type DoorKey = 'music' | 'games' | 'apps';
 
@@ -79,7 +80,7 @@ export const DOORS: readonly Door[] = [
     title: 'Music',
     sub: 'Sing-alongs, lessons, songs',
     intro: 'Sing-alongs, guitar lessons, songs of my own, and a band on a break.',
-    href: '/music',
+    href: withBase('/music'),
     cover: { caption: 'Assaf with guitar at a sing-along', file: 'home-13.jpg', kind: 'photo' },
   },
   {
@@ -87,7 +88,7 @@ export const DOORS: readonly Door[] = [
     title: 'Games',
     sub: 'Games I made in Unity',
     intro: 'Games I made in Unity, from small classics to ChessLord.',
-    href: '/games',
+    href: withBase('/games'),
     cover: { caption: 'ChessLord key art', file: 'home-14.png', kind: 'screen' },
   },
   {
@@ -95,7 +96,7 @@ export const DOORS: readonly Door[] = [
     title: 'Apps',
     sub: 'Apps and systems I built',
     intro: 'Management systems, Flutter apps and a final project. Private systems are shown as screenshots only.',
-    href: '/apps',
+    href: withBase('/apps'),
     cover: { caption: 'Collage of app screens, data blurred', file: 'home-15.png', kind: 'screen' },
   },
 ];

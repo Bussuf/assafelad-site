@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { withBase } from './nav';
 
 export type Project = CollectionEntry<'projects'>;
 export type DoorKey = Project['data']['door'];
@@ -13,7 +14,7 @@ export async function projectsOf(door: DoorKey): Promise<Project[]> {
 }
 
 /** "/games/chesslord": the door path, then the file name. */
-export const projectHref = (p: Project): string => `/${p.data.door}/${p.id}`;
+export const projectHref = (p: Project): string => withBase(`/${p.data.door}/${p.id}`);
 
 /** The count line on the home doors and the door pages. */
 export function countLine(door: DoorKey, items: Project[]): string {

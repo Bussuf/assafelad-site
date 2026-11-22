@@ -5,6 +5,7 @@
 import { navigate } from 'astro:transitions/client';
 import * as sound from '../lib/sound';
 import { ukeStep } from '../lib/ukulele';
+import { stripBase } from '../lib/nav';
 
 const THEME_KEY = 'assaf-theme';
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -122,7 +123,7 @@ addEventListener('scroll', syncStuck, { passive: true });
 /* Inside one door's room, moving between projects keeps the room still: no entrance animation for the columns,
    only a short fade on the project (his pick, #13 - "like About"). */
 document.addEventListener('astro:before-swap', (e) => {
-  const door = (path: string) => path.split('/').filter(Boolean)[0] ?? '';
+  const door = (path: string) => stripBase(path).split('/').filter(Boolean)[0] ?? '';
   const from = door(location.pathname);
   const to = door(e.to.pathname);
   if (from && from === to && ['music', 'games', 'apps'].includes(from)) e.newDocument.documentElement.classList.add('calm');

@@ -1,5 +1,6 @@
 /* About page copy, from mockup v7. File names follow the assets checklist (about-01 ... about-20). */
 import type { Shot } from './home';
+import { withBase } from '../lib/nav';
 
 export interface TextTodo {
   what: string;
@@ -53,7 +54,7 @@ export const TOPICS: readonly Topic[] = [
     body: 'Sing-along evenings, including at care homes. Guitar and music lessons. Original songs, and השכנים (The Neighbors), a band on a break.',
     door: 'music',
     highlights: ['sing-alongs', 'original-songs'],
-    go: { href: '/music', label: 'Open Music' },
+    go: { href: withBase('/music'), label: 'Open Music' },
     hint: 'Fun fact: my nav bar is tuned like a ukulele. Apps, Music, Games, About: G, C, E, A. Turn the sound on and strum it three times.',
   },
   {
@@ -65,7 +66,7 @@ export const TOPICS: readonly Topic[] = [
     body: 'Games I made in Unity. ChessLord is the big one, and NewChessLord rebuilds it from scratch.',
     door: 'games',
     highlights: ['chesslord', 'space-janitor'],
-    go: { href: '/games', label: 'Open Games' },
+    go: { href: withBase('/games'), label: 'Open Games' },
   },
   {
     id: 'apps',
@@ -76,7 +77,7 @@ export const TOPICS: readonly Topic[] = [
     body: 'Management systems, Flutter apps and a final project with Omer. Private systems are shown as screenshots only.',
     door: 'apps',
     highlights: ['music-studio', 'pets'],
-    go: { href: '/apps', label: 'Open Apps' },
+    go: { href: withBase('/apps'), label: 'Open Apps' },
   },
   {
     id: 'ai',
@@ -107,7 +108,7 @@ export const TOPICS: readonly Topic[] = [
           { caption: 'Looker Studio report, a drill-down view', file: 'agrilab-pro-02.png', kind: 'screen' },
         ],
         todo: { what: 'What the report shows and what it answered', words: 40 },
-        go: { href: '/apps/agrilab-pro', label: 'Open AgriLab-PRO' },
+        go: { href: withBase('/apps/agrilab-pro'), label: 'Open AgriLab-PRO' },
       },
       {
         heading: 'Side story: the Travian alliance',
