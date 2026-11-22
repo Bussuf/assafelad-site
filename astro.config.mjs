@@ -9,6 +9,9 @@ export default defineConfig({
   // Locally it is unset, so localhost stays at "/".
   site: 'https://bussuf.github.io',
   // read through globalThis: the project has no Node type definitions, and adding @types/node for one line is not worth it
+  // CSS goes inside each page: a page cached from before a deploy never points at a CSS file that is gone
+  // (pages loaded unstyled right after a push, his note)
+  build: { inlineStylesheets: 'always' },
   base: /** @type {any} */ (globalThis).process?.env?.SITE_BASE || '/',
   // Rubik is downloaded at build time and served from the site itself (no Google Fonts link).
   fonts: [

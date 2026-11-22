@@ -92,6 +92,10 @@
   body {
     overflow-x: clip;
   }
+  /* Android paints its own grey box on every tap (it flashed on the gallery arrows); our press ring replaces it */
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
   /* phone: room under the last line for the floating Hotbar (54px slots + 12px frame + 12px gap + air),
      so the footer can scroll up above it (his note) */
   @media (max-width: 43.74rem) {

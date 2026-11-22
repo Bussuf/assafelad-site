@@ -73,9 +73,32 @@ function pressFx(el: HTMLElement): void {
       { duration: 380, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' },
     );
 }
+/* The new press (test on About first, his pick): the ring is the control's own outline, growing out and
+   fading, so it moves with the control when the page scrolls and is gone when the control is gone.
+   Web Animations only: no class is added, so a control's CSS animations (entrance motion) are never restarted.
+   The one exception to "transform/opacity only": outline-offset and outline-color, paint only, no layout. */
+function pressFxOutline(el: HTMLElement): void {
+  const style = getComputedStyle(el);
+  const color = style.getPropertyValue('--c').trim() || style.getPropertyValue('--link').trim() || 'currentColor';
+  const timing = { duration: 300, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' };
+  if (!reduceMotion()) {
+    el.animate([{ scale: '1' }, { scale: '0.94', offset: 0.35 }, { scale: '1' }], timing);
+  }
+  el.animate(
+    [
+      { outlineStyle: 'solid', outlineWidth: '2px', outlineColor: color, outlineOffset: '0px' },
+      { outlineStyle: 'solid', outlineWidth: '2px', outlineColor: 'transparent', outlineOffset: reduceMotion() ? '0px' : '7px' },
+    ],
+    timing,
+  );
+}
+const onTestPage = () => stripBase(location.pathname).startsWith('/about');
+
 document.addEventListener('click', (event) => {
   const el = (event.target as Element | null)?.closest<HTMLElement>(PRESSABLE);
-  if (el && !(el as HTMLButtonElement).disabled) pressFx(el);
+  if (!el || (el as HTMLButtonElement).disabled) return;
+  if (onTestPage()) pressFxOutline(el);
+  else pressFx(el);
 });
 
 /* The three header tools get a move of their own on top (his pick, option A). */
