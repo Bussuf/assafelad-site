@@ -40,8 +40,8 @@ const { current } = Astro.props;
      with every slot filled in its door color, so the bar never blends into the page. */
   .hotbar {
     background: var(--ink);
-    /* short and soft (his note: it was too strong and fell too low) */
-    box-shadow: 0 4px 14px -4px rgb(0 0 0 / 0.35), 0 0 0 3px color-mix(in srgb, var(--paper) 80%, transparent);
+    /* short and tight: a wider spread reached Android's system bar and was cut there (his note) */
+    box-shadow: 0 3px 8px -2px rgb(0 0 0 / 0.38), 0 0 0 3px color-mix(in srgb, var(--paper) 80%, transparent);
   }
   .slot { opacity: 0.82; }
   /* light theme: the dimmed slots looked shaded on the dark frame, so they stay nearly full */

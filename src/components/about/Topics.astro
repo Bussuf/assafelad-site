@@ -209,6 +209,10 @@ const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-
   .detail.swap .db > :nth-child(2) { animation-delay: 0.05s; }
   .detail.swap .db > :nth-child(3) { animation-delay: 0.1s; }
   .detail.swap .db > :nth-child(4) { animation-delay: 0.15s; }
+  /* phone: the scroll already shows where the content went, so no slide on top of it - a short fade only */
+  @media (max-width: 43.74rem) {
+    .detail.swap .db > * { animation: calm-in 0.18s ease-out both !important; }
+  }
   .dsub { margin: 8px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); font-weight: 600; font-size: 16px; }
   .hl {
     display: grid;
@@ -269,9 +273,11 @@ const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-
       if (focus) tab.focus();
       // on a phone the panel sits under the tiles: bring it into view
       if (!matchMedia('(min-width: 43.75rem)').matches) {
-        // a smooth scroll shows where the content went (a jump felt like a page change)
+        // a smooth scroll shows where the content went (a jump felt like a page change).
+        // It starts after the press ring, so the two never mix (his note); short, so it never feels slow.
         const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-        root.querySelector(`[data-topic-panel="${tab.dataset.topic}"]`)?.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+        const panel = root.querySelector(`[data-topic-panel="${tab.dataset.topic}"]`);
+        setTimeout(() => panel?.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' }), focus ? 0 : 160);
       }
     };
 
@@ -280,7 +286,7 @@ const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-
       if (back) {
         e.preventDefault();
         const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-        document.getElementById('what-title')?.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+        setTimeout(() => document.getElementById('what-title')?.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' }), 160);
         return;
       }
       const tab = (e.target as Element).closest<HTMLButtonElement>('[role="tab"]');
