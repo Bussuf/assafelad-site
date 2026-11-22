@@ -133,12 +133,18 @@ const count = countLine(door.key, items);
   .peekbtn {
     display: none;
     position: absolute;
-    top: 12px;
-    right: 12px;
-    border: 1px solid color-mix(in srgb, var(--c-on) 40%, transparent);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-size: 12.5px;
+    top: 9px;
+    right: 10px;
+    /* big enough for a thumb (his note, #13) */
+    align-items: center;
+    min-height: 44px;
+    min-width: 72px;
+    justify-content: center;
+    border: 1.5px solid color-mix(in srgb, var(--c-on) 55%, transparent);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 15px;
+    font-weight: 600;
     color: var(--c-on);
   }
   @media (hover: none), (pointer: coarse) {

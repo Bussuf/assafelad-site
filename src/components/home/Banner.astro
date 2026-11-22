@@ -18,14 +18,15 @@ const words = JSON.stringify(BANNER.map(({ word, color, caption }) => ({ word, c
   <div>
     <p class="mb-2.5 text-[15px] text-soft" data-a="up">Hi, I'm Assaf. Most of my friends call me Bussuf.</p>
     <p
-      class="m-0 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[clamp(40px,7.4vw,72px)] leading-[1.04] font-extrabold tracking-[-0.015em]"
+      class="m-0 flex flex-nowrap items-center gap-x-3 whitespace-nowrap text-[clamp(28px,8.2vw,72px)] leading-[1.04] font-extrabold tracking-[-0.015em]"
       data-a="left"
       style="--d:80ms"
     >
       I play
       <span class={`reel k-${first.color}`} data-reel><span data-word>{first.word}</span></span>
     </p>
-    <p class="mt-4 max-w-[40ch] text-[17px] text-soft nav:min-h-[3.2em]" data-cap data-a="up" style="--d:180ms">
+    <!-- a fixed height for two lines, so a longer caption never pushes the page down -->
+    <p class="mt-4 min-h-[3.2em] max-w-[40ch] text-[17px] text-soft" data-cap data-a="up" style="--d:180ms">
       {first.caption}
     </p>
     <div class="mt-3.5 flex items-center gap-3" data-a="up" style="--d:240ms">

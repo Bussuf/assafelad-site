@@ -51,13 +51,14 @@ export const BANNER: readonly BannerWord[] = [
     ],
   },
   {
-    word: 'too much RimWorld',
+    // "too much", not one game (his pick, #13): short enough to stay on one line, and about gaming in general
+    word: 'too much',
     color: 'home',
-    caption: '1,547 hours and counting. Send help.',
+    caption: '7,282 hours on Steam. I regret nothing.',
     shots: [
       { caption: 'My RimWorld colony', file: 'home-10.png', kind: 'screen' },
-      { caption: 'A colony having a very bad day', file: 'home-11.png', kind: 'screen' },
-      { caption: 'Steam library: 1,547.4 hours in RimWorld', file: 'home-12.png', kind: 'screen' },
+      { caption: 'A factory in Factorio or Satisfactory', file: 'home-11.png', kind: 'screen' },
+      { caption: 'My Steam library, hours played', file: 'home-12.png', kind: 'screen' },
     ],
   },
 ];

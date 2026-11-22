@@ -192,6 +192,22 @@ html:has(dialog[open]) { overflow: hidden; }
 @keyframes a-drop { from { opacity: 0; transform: translateY(-26px) rotate(-1.5deg); } }
 @keyframes a-zoom { from { opacity: 0; transform: scale(1.06); } }
 
+/* moving inside a room: the columns stay put, only the project fades in */
+html.calm [data-a] { animation: none !important; }
+@media (prefers-reduced-motion: no-preference) {
+  html.calm .panel { animation: calm-in 0.22s ease-out both; }
+}
+@keyframes calm-in { from { opacity: 0.35; } }
+
+/* phone and tablet: every control is at least 44px to the finger */
+@media (pointer: coarse) {
+  html :is([data-dice], [data-sound-toggle], [data-theme-toggle], [data-pause], [data-close], [data-uke-close], [data-chord], [data-strum], [data-four], [data-layout], [data-filter]) {
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+  }
+}
+
 /* Surprise me: the dice rolls before the random page opens */
 .dice.rolling svg { animation: dice-roll 0.65s cubic-bezier(0.3, 0.6, 0.3, 1); }
 @keyframes dice-roll { to { transform: rotate(720deg) scale(1.15); } }

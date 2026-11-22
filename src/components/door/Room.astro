@@ -9,6 +9,7 @@ import GameWindow from '../project/GameWindow.astro';
 import ProjectSwitcher from '../project/ProjectSwitcher.astro';
 import { DOORS } from '../../data/home';
 import { countLine, langOf, projectHref, projectsOf, type DoorKey, type Project } from '../../lib/projects';
+import { findImage, isTall } from '../../lib/images';
 
 /* A door is a "room" (his design, #12): on a computer three columns in one screen - the door, every project as a
    button, and the selected project. /games lands on the first project; each project keeps its own address.
@@ -28,6 +29,13 @@ const { name, status, state, made, summary, summaryTodo, link } = current.data;
 const music = door === 'music';
 const { Content } = await render(current);
 const hasAbout = !!current.body?.trim();
+// The project area follows the pictures' shape (his pick, #13): wide shots get a wide image on top with the text
+// below; phone-shaped or upright pictures keep the image on the left. Before a real image exists: Music upright.
+// A wide cover with phone screenshots (SIMON, Laser Defender) counts as upright: the screenshots decide.
+const heroImg = findImage(current.data.hero.file);
+const shots = current.data.gallery.filter((g) => findImage(g.file));
+const mostlyTall = shots.length > 0 && shots.filter((g) => isTall(g.file)).length > shots.length / 2;
+const wide = heroImg ? !mostlyTall && heroImg.width / heroImg.height >= 1.25 : !music;
 const aboutTodo = music
   ? { what: 'About: what it is, who it is for, how to join', words: 70 }
   : { what: 'About: what it is, why I made it, one thing I learned', words: 90 };
@@ -75,7 +83,7 @@ const aboutTodo = music
     }
   </nav>
 
-  <article class="panel" aria-labelledby="project-title">
+  <article class:list={['panel', { wide }]} aria-labelledby="project-title">
     <header class="phead">
       <div class="flex items-center gap-3">
         <span class="h-[30px] w-2.5 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
@@ -198,7 +206,18 @@ const aboutTodo = music
     }
     .phead { grid-area: head; }
     .panel :global(.gal) { grid-area: gal; min-height: 0; }
-    .info { grid-area: info; overflow-y: auto; padding-right: 4px; }
+    /* the padding keeps a button's hover glow inside the scrolling box (it was cut off) */
+    .info { grid-area: info; overflow-y: auto; padding: 4px 8px 4px 4px; margin: -4px; }
     .where { margin-top: auto; }
+
+    /* wide pictures: the image across the whole area, title and buttons on the left below it, text on the right */
+    .panel.wide {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+      grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-areas: 'gal gal' 'head info';
+      row-gap: 16px;
+    }
+    .panel.wide .info { max-height: 30dvh; }
+    .panel.wide .where { margin-top: 0; }
   }
 </style>

@@ -119,6 +119,15 @@ function syncStuck(): void {
 }
 addEventListener('scroll', syncStuck, { passive: true });
 
+/* Inside one door's room, moving between projects keeps the room still: no entrance animation for the columns,
+   only a short fade on the project (his pick, #13 - "like About"). */
+document.addEventListener('astro:before-swap', (e) => {
+  const door = (path: string) => path.split('/').filter(Boolean)[0] ?? '';
+  const from = door(location.pathname);
+  const to = door(e.to.pathname);
+  if (from && from === to && ['music', 'games', 'apps'].includes(from)) e.newDocument.documentElement.classList.add('calm');
+});
+
 /* After every page swap the header is new markup: bring its state back. */
 document.addEventListener('astro:page-load', () => {
   syncSoundButton();
