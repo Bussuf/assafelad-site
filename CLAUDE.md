@@ -14,7 +14,7 @@ Layer 2 for this project (`F:\Projects\Web` has no domain CLAUDE.md). `C:\Users\
 | Design, copy, humor, sound, ukulele mode | Final mockup v7: https://claude.ai/artifact/KxXpNeNGDPTcHRSRJkJ244 (read with Artifact read). Its code is a prototype, not code to copy |
 | Design-phase decisions (frozen) | `G:\My Drive\08 פרויקטים אישיים\אתר אישי\מיצוב ומצב טכני.md`, sections 4-5 |
 | Projects picked | `G:\My Drive\08 פרויקטים אישיים\אתר אישי\מלאי פרויקטים.md` |
-| Assets and texts checklist | `G:\My Drive\08 פרויקטים אישיים\אתר אישי\נכסים וטקסטים לאתר - v2.xlsx`, generated from the site's content files by a script he runs (#9). The old `נכסים וטקסטים לאתר.xlsx` stays as it was. Claude never writes either file |
+| Assets and texts checklist | `G:\My Drive\08 פרויקטים אישיים\אתר אישי\נכסים וטקסטים לאתר - v3.xlsx` (photo hunt, #16), generated from the site's content files by a script he runs. Older versions are not used. Claude never writes it |
 | Build state and new decisions | `BACKLOG.md` here |
 
 ## Public repo rules
