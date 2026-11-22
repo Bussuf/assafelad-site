@@ -58,6 +58,8 @@ function pressFx(el: HTMLElement): void {
     boxShadow: `0 0 0 2px ${color}`,
     pointerEvents: 'none',
     zIndex: '60',
+    // hidden at rest: the animation shows it; without this it flashed back between the animation's end and removal
+    opacity: '0',
   });
   document.body.append(ring);
   const grow = reduceMotion() || big ? 1 : 1.35;
