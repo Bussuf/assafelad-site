@@ -129,6 +129,23 @@
   white-space: nowrap;
 }
 
+/* Every control answers the pointer (his note: Play / Download had no hover). Hover only on a real pointer;
+   a press shrinks a little everywhere. "html" in front outranks the components' own styles. */
+@media (hover: hover) and (pointer: fine) {
+  html .play-btn:hover { filter: brightness(1.12); box-shadow: 0 0 0 3px color-mix(in srgb, var(--grass) 35%, transparent); }
+  html .play-btn.play-alt:hover { background: color-mix(in srgb, var(--grass) 18%, transparent); }
+  html :is([data-pause], [data-filter], [data-layout], [data-close], [data-uke-close], [data-chord], [data-strum], [data-four], [data-peek], [data-dice], [data-sound-toggle], [data-theme-toggle], .go-btn):hover {
+    border-color: var(--c, var(--link));
+    color: var(--ink);
+    background-color: color-mix(in srgb, var(--c, var(--link)) 14%, transparent);
+  }
+  html [data-peek]:hover { color: var(--c-on); background-color: color-mix(in srgb, var(--c-on) 18%, transparent); }
+  html .logo-link:hover { opacity: 0.85; }
+}
+html :is(.play-btn, [data-pause], [data-filter], [data-layout], [data-close], [data-uke-close], [data-chord], [data-strum], [data-four], [data-peek], .go-btn):active {
+  transform: scale(0.97);
+}
+
 /* the second Play button: outlined, so the main one stays the main one */
 .play-btn.play-alt {
   background: transparent;

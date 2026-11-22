@@ -14,7 +14,7 @@ const fmt = (n: number) => n.toLocaleString('en-US');
 
 /** Hebrew runs (the band name) go inside <bdi lang="he">. */
 const runs = (text: string) => text.split(/([֐-׿][֐-׿ ]*[֐-׿]|[֐-׿])/);
-const btn = 'justify-self-start inline-flex items-center gap-1.5 rounded-md border border-door px-3 py-[3px] text-sm font-medium text-ink';
+const btn = 'go-btn justify-self-start inline-flex items-center gap-1.5 rounded-md border border-door px-3 py-[3px] text-sm font-medium text-ink';
 ---
 
 <div class="topics grid items-start gap-6 nav:grid-cols-[270px_minmax(0,1fr)]" data-topics>
