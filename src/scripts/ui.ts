@@ -27,6 +27,63 @@ document.addEventListener(
   { capture: true },
 );
 
+/* Press feedback for every control (his note: taps felt dead on the phone, also with sound off).
+   1. a pop: in, a little past full size, settle. It animates the `scale` property, not `transform`,
+      so it adds to a control's own lift (the Hotbar slot) instead of replacing it.
+   2. a ring in the door color that grows out of the control and fades. It is a separate fixed element
+      laid over the control, so no control's layout or ::after is touched. */
+const PRESSABLE = 'button, [role="button"], a[data-nav], .go-btn, .play-btn, [data-door] .dmain';
+function pressFx(el: HTMLElement): void {
+  const box = el.getBoundingClientRect();
+  if (!box.width) return;
+  const big = box.width > 220;
+  if (!reduceMotion()) {
+    const s = big ? ['0.98', '1.01', '1'] : ['0.92', '1.06', '1'];
+    el.animate([{ scale: '1' }, { scale: s[0], offset: 0.3 }, { scale: s[1], offset: 0.65 }, { scale: s[2] }], {
+      duration: 280,
+      easing: 'ease-out',
+    });
+  }
+  const style = getComputedStyle(el);
+  const color = style.getPropertyValue('--c').trim() || style.getPropertyValue('--link').trim() || 'currentColor';
+  const ring = document.createElement('span');
+  ring.setAttribute('aria-hidden', 'true');
+  Object.assign(ring.style, {
+    position: 'fixed',
+    left: `${box.left}px`,
+    top: `${box.top}px`,
+    width: `${box.width}px`,
+    height: `${box.height}px`,
+    borderRadius: style.borderRadius || '10px',
+    boxShadow: `0 0 0 2px ${color}`,
+    pointerEvents: 'none',
+    zIndex: '60',
+  });
+  document.body.append(ring);
+  const grow = reduceMotion() || big ? 1 : 1.35;
+  // removed by a timer, not by the animation's end: a background tab may never finish the animation
+  setTimeout(() => ring.remove(), 600);
+  ring.animate(
+      [
+        { opacity: 0.9, transform: 'scale(1)' },
+        { opacity: 0, transform: `scale(${grow})` },
+      ],
+      { duration: 380, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' },
+    );
+}
+document.addEventListener('click', (event) => {
+  const el = (event.target as Element | null)?.closest<HTMLElement>(PRESSABLE);
+  if (el && !(el as HTMLButtonElement).disabled) pressFx(el);
+});
+
+/* The three header tools get a move of their own on top (his pick, option A). */
+function iconMove(btn: Element, frames: Keyframe[], duration: number): void {
+  if (reduceMotion()) return;
+  // the visible icon: the toggles keep both icons and hide one with CSS
+  const svg = [...btn.querySelectorAll('svg')].find((s) => s.getClientRects().length > 0);
+  svg?.animate(frames, { duration, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+}
+
 document.addEventListener('click', (event) => {
   const target = event.target as Element | null;
 
@@ -34,6 +91,14 @@ document.addEventListener('click', (event) => {
   if (soundBtn) {
     sound.setSound(!sound.isSoundOn());
     syncSoundButton();
+    // on: the speaker shakes as if it plays; off: it sinks and comes back
+    iconMove(
+      soundBtn,
+      sound.isSoundOn()
+        ? [{ rotate: '0deg' }, { rotate: '-14deg', scale: '1.2' }, { rotate: '10deg' }, { rotate: '-5deg' }, { rotate: '0deg', scale: '1' }]
+        : [{ scale: '1' }, { scale: '0.7', opacity: 0.5 }, { scale: '1', opacity: 1 }],
+      420,
+    );
     return;
   }
 
@@ -47,6 +112,8 @@ document.addEventListener('click', (event) => {
       // not remembered, still switched for this visit
     }
     syncThemeButton();
+    // the new sun or moon turns in
+    iconMove(themeBtn, [{ rotate: '-180deg', scale: '0.5', opacity: 0 }, { rotate: '0deg', scale: '1', opacity: 1 }], 480);
     return;
   }
 
