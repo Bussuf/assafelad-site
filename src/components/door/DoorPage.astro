@@ -20,20 +20,21 @@ const chip = 'rounded-full border border-rule bg-paper px-3 py-0.5 text-sm font-
 const seg = 'inline-flex items-center gap-[5px] px-2.5 py-[3px] text-[13.5px] text-soft';
 ---
 
-<div class={`k-${door.key} pb-10`} data-shelf>
-  <div class="grid items-center gap-6 pt-[26px] pb-[18px] nav:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+<div class={`k-${door.key} pb-4`} data-shelf>
+  <!-- the cover is small on a computer (his call, #12), so one row of cards fits the screen -->
+  <div class="grid items-center gap-6 pt-[18px] pb-3 nav:grid-cols-[minmax(0,1fr)_minmax(0,340px)]">
     <div>
       <span class="inline-flex items-center gap-2 text-[15px] font-semibold text-door" data-a="left" style="--d:40ms">
         <Icon name={door.key} class="size-[22px]" />{countLine(door.key, items)}
       </span>
       <h1
-        class="mt-2 mb-1.5 text-[clamp(34px,6vw,56px)] leading-[1.08] font-extrabold tracking-[-0.015em]"
+        class="mt-1.5 mb-1 text-[clamp(34px,4.5vw,52px)] leading-[1.08] font-extrabold tracking-[-0.015em]"
         data-a="left"
         style="--d:90ms"
       >
         {door.title}
       </h1>
-      <p class="mb-4 max-w-[60ch] text-[17px] text-soft" data-a="up" style="--d:150ms">{door.intro}</p>
+      <p class="mb-0 max-w-[60ch] text-[17px] text-soft" data-a="up" style="--d:150ms">{door.intro}</p>
     </div>
     <div data-a="zoom" style="--d:60ms">
       <Placeholder caption={door.cover.caption} file={door.cover.file} kind={door.cover.kind} ratio="16:9" />

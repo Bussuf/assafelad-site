@@ -25,7 +25,7 @@ export const BANNER: readonly BannerWord[] = [
     color: 'music',
     caption: 'At sing-alongs, in lessons and in songs of my own.',
     shots: [
-      { caption: 'Sing-along at a care home, wide shot', file: 'home-01.jpg', kind: 'photo' },
+      { caption: 'A sing-along evening in a living room', file: 'home-01.jpg', kind: 'photo' },
       { caption: 'Guitar lesson, hands on the fretboard', file: 'home-02.jpg', kind: 'photo' },
       { caption: 'Assaf with guitar, portrait', file: 'home-03.jpg', kind: 'photo' },
     ],

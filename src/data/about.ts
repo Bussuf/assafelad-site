@@ -32,8 +32,13 @@ export interface Topic {
 }
 
 export const INTRO = {
-  then: { caption: 'Then: childhood photo from the old site', file: 'about-01.jpg', kind: 'photo' } as Shot,
-  now: { caption: 'Now: a current portrait of Assaf', file: 'about-02.jpg', kind: 'photo' } as Shot,
+  then: { caption: 'Then: me at my first computer, 1992', file: 'about-01.png', kind: 'photo' } as Shot,
+  /** a pool: each visit shows one of these at random (his idea, #12) */
+  now: [
+    { caption: 'Now: me at the Acropolis', file: 'about-02.jpg', kind: 'photo' },
+    { caption: 'Now: me at my desk', file: 'about-02-2.jpg', kind: 'photo' },
+    { caption: 'Now: me playing guitar at a show', file: 'about-02-3.jpg', kind: 'photo' },
+  ] as Shot[],
   todo: { what: 'From that kid to music, games and apps: the rest of the intro', words: 50 },
 };
 

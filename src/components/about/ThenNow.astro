@@ -16,7 +16,11 @@ const sparks = [
 ---
 
 <div class="tn" tabindex="0" data-then-now aria-label="Now and then photo. Hover, focus or tap to see then.">
-  <Placeholder caption={INTRO.now.caption} file={INTRO.now.file} kind={INTRO.now.kind} ratio="4:5" class="now" />
+  {
+    INTRO.now.map((n, i) => (
+      <Placeholder caption={n.caption} file={n.file} kind={n.kind} ratio="4:5" class="now" data-now={String(i)} hidden={i !== 0} />
+    ))
+  }
   <Placeholder caption={INTRO.then.caption} file={INTRO.then.file} kind={INTRO.then.kind} ratio="4:5" class="then" />
   {sparks.map(([x, y, d]) => <span class="spk" style={`--x:${x}%;--y:${y}%;--sd:${d}s`} aria-hidden="true" />)}
   <span class="tnl" aria-hidden="true"><span class="l-now">Now</span><span class="l-then">Then</span></span>
@@ -87,6 +91,14 @@ const sparks = [
 
 <script>
   import { magic } from '../../lib/sound';
+
+  /* Now is a pool: each visit to About shows one of the photos at random. */
+  document.addEventListener('astro:page-load', () => {
+    const pool = [...document.querySelectorAll<HTMLElement>('[data-then-now] [data-now]')];
+    if (pool.length < 2) return;
+    const pick = Math.floor(Math.random() * pool.length);
+    pool.forEach((el, i) => (el.hidden = i !== pick));
+  });
 
   /* Delegated (survives page swaps). Mouse: hover. Keyboard: focus. Touch and pen: a tap toggles. */
   const isTn = (el: EventTarget | null) => (el instanceof Element ? el.closest<HTMLElement>('[data-then-now]') : null);
