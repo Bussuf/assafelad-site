@@ -34,17 +34,20 @@ const pageTitle = current === 'home' ? title : `${title} | Assaf Elad`;
     <!-- Before first paint: dark unless the visitor chose light. Re-applied after every page swap. -->
     <script is:inline>
       (() => {
-        const apply = () => {
-          let theme = 'dark';
+        const theme = () => {
           try {
-            if (localStorage.getItem('assaf-theme') === 'light') theme = 'light';
+            if (localStorage.getItem('assaf-theme') === 'light') return 'light';
           } catch {}
-          document.documentElement.dataset.theme = theme;
+          return 'dark';
         };
-        apply();
+        document.documentElement.dataset.theme = theme();
         if (!window.__assafTheme) {
           window.__assafTheme = true;
-          document.addEventListener('astro:after-swap', apply);
+          // mark the NEW page before it is shown: setting it after the swap flashed dark for a moment in light mode,
+          // and Android repainted its system bar each time (his note)
+          document.addEventListener('astro:before-swap', (e) => {
+            e.newDocument.documentElement.dataset.theme = theme();
+          });
         }
       })();
     </script>
