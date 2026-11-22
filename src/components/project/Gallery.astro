@@ -102,6 +102,7 @@ const shots = [project.data.hero, ...project.data.gallery];
     line-height: 1;
   }
   .arrow[hidden] { display: none; }
+  .arrow[data-off] { visibility: hidden; }
   @media (hover: hover) and (pointer: fine) {
     .arrow:hover { border-color: var(--c); }
   }
@@ -122,8 +123,10 @@ const shots = [project.data.hero, ...project.data.gallery];
     const row = strip.querySelector<HTMLElement>('[data-thumbs]')!;
     const more = row.scrollWidth > row.clientWidth + 2;
     const [back, fwd] = strip.querySelectorAll<HTMLElement>('[data-scroll]');
-    back!.hidden = !more || row.scrollLeft <= 2;
-    fwd!.hidden = !more || row.scrollLeft + row.clientWidth >= row.scrollWidth - 2;
+    // With overflow both arrows keep their place, so the row never changes width while scrolling (his note, #14 follow-up)
+    back!.hidden = fwd!.hidden = !more;
+    back!.toggleAttribute('data-off', row.scrollLeft <= 2);
+    fwd!.toggleAttribute('data-off', row.scrollLeft + row.clientWidth >= row.scrollWidth - 2);
   }
   document.addEventListener('astro:page-load', () => {
     document.querySelectorAll('[data-strip]').forEach((strip) => {
