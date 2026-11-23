@@ -106,7 +106,10 @@ const shots = [project.data.hero, ...project.data.gallery];
   @media (hover: hover) and (pointer: fine) {
     .arrow:hover { border-color: var(--c); }
   }
-  .thumb[aria-pressed='true'] { border-color: var(--c); }
+  /* "selected", the same language as the About topics and the room list: the door color frames it and it is
+     the only one in full; a picture has no room for a tint, so the others step back a little instead */
+  .thumb { transition: opacity 0.15s, border-color 0.15s; opacity: 0.72; }
+  .thumb[aria-pressed='true'] { border-color: var(--c); box-shadow: 0 0 0 1px var(--c); opacity: 1; }
   @media (hover: hover) and (pointer: fine) {
     .thumb:hover { border-color: var(--c); }
   }

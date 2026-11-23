@@ -154,8 +154,10 @@ const aboutTodo = music
   }
   .txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
   .txt b { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-  .chev { color: var(--c); font-size: 20px; }
+  .chev { color: var(--c); font-size: 20px; transition: transform 0.2s; }
+  /* "selected", the same language as the About topics: door-color border, soft tint, the mark leans in */
   .item[aria-current='page'] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--raise)); }
+  .item[aria-current='page'] .chev { transform: translateX(3px) scale(1.12); }
   @media (hover: hover) and (pointer: fine) {
     .item:hover { border-color: var(--c); }
   }
