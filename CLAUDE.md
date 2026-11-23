@@ -36,6 +36,28 @@ Layer 2 for this project (`F:\Projects\Web` has no domain CLAUDE.md). `C:\Users\
 - Astro ClientRouter (view transitions), so nav notes are not cut by page loads and the ukulele sequence survives navigation. Every page opens at its top.
 - Accessibility: full keyboard use, visible focus, `<dialog>` for the game window and ukulele.
 
+## Interaction standard (his rule, 2026-11-23: one look on every page, phone and computer)
+Every element is one of three kinds (his definitions). The list of which elements belong to which kind lives in ONE place in code (`src/scripts/ui.ts` + `src/styles/global.css`); a component never invents its own.
+
+| Kind | What (his words) | Examples |
+|---|---|---|
+| Button | Anything that takes a click and changes navigation or the UI, also when it sits inside a card | header tools, Hotbar slots, Play, Close, Peek, gallery arrows and thumbnails, Previous/Next, "Open ...", "All topics", doors, room project list, About topics, About project rows |
+| Card | Shows information only, not clickable | the project info box, About topic panels, Steam library rows, the banner caption |
+| Text | A text link, like the header tabs, the footer links, links inside a sentence | header tabs (Music Games Apps About), footer, "Where to see it" |
+
+| State | Button | Card | Text |
+|---|---|---|---|
+| Hover (real pointer only) | door-color border + soft fill (14%). A picture button comes to full strength instead of a fill | a soft highlight (border to the door color) | very, very subtle: the text moves a little toward the door color |
+| Press (pointerdown) | sinks (scale 0.94; 0.98 for wide ones) and stays down while held | - | its own effect, not the button's: a quick underline that draws out from the center |
+| Release (pointerup) | springs back, and the highlight ring grows out of it (outline 0 to 7px) and fades | - | - |
+| Selected | door-color border + soft fill + its mark leans in (icon tilt / chevron nudge). Picture buttons: border + the others at 72% | - | the nav mark below |
+| Focus (keyboard) | the visible focus ring | - | the visible focus ring |
+
+Navigation keeps its own "where you are" mark (Hotbar: lifted + ring; header tabs: underline), not the card style.
+
+Timing tokens (do not invent others): press 300ms; color/fill change 150ms; icon move 200ms; auto-scroll after a press waits 160ms; a link that opens a page waits 200ms so the press is seen; a content fade after a scroll 180ms. Easing `cubic-bezier(0.2, 0.8, 0.2, 1)`.
+Rules: never two motions on the same thing at once (press, then scroll, then content); no motion longer than 400ms on a tap; `prefers-reduced-motion` keeps only the fade of the ring. Android's own tap highlight stays off.
+
 ## Sound rules (final)
 | Action | Sound |
 |---|---|
