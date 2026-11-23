@@ -69,6 +69,9 @@ const shareUrl = share ? absoluteUrl(share.src, site) : undefined;
     <meta name="twitter:card" content={share ? 'summary_large_image' : 'summary'} />
     <slot name="head" />
     <meta name="generator" content={Astro.generator} />
+    {/* the phone's browser bar takes the page color; the script below and the toggle keep it with the theme */}
+    <meta name="theme-color" content="#141b26" data-theme-color />
+
     <Font cssVariable="--font-rubik" preload={[{ subset: 'latin' }]} />
     <!-- Before first paint: dark unless the visitor chose light. Re-applied after every page swap. -->
     <script is:inline>
@@ -79,13 +82,17 @@ const shareUrl = share ? absoluteUrl(share.src, site) : undefined;
           } catch {}
           return 'dark';
         };
+        // the paper colors in global.css; ui.ts sets the same pair on the toggle
+        const bar = (doc, t) => doc.querySelector('[data-theme-color]')?.setAttribute('content', t === 'light' ? '#ffffff' : '#141b26');
         document.documentElement.dataset.theme = theme();
+        bar(document, theme());
         if (!window.__assafTheme) {
           window.__assafTheme = true;
           // mark the NEW page before it is shown: setting it after the swap flashed dark for a moment in light mode,
           // and Android repainted its system bar each time (his note)
           document.addEventListener('astro:before-swap', (e) => {
             e.newDocument.documentElement.dataset.theme = theme();
+            bar(e.newDocument, theme());
           });
         }
       })();

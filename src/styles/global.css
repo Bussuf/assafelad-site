@@ -31,19 +31,21 @@
   --ink: #22304a;
   --soft: #5a6780;
   --rule: #dde4ee;
-  --link: #2a6fc4;
-  --sun: #f3b62c;
-  --berry: #de4f7a;
-  --sky: #3a8fdc;
-  --grass: #38a657;
-  --plum: #7d5cd6;
-  --on-sun: #22304a;
+  /* Deeper door colors than v7 (#6, his call: the whole light theme, not only text): each one reads at 4.5:1 or more
+     as text on paper, raise and cloud, and white text on it does too. v7's light yellow was 1.8:1. Dark is unchanged. */
+  --link: #1f64b8;
+  --sun: #8f6000;
+  --berry: #c2335f;
+  --sky: #1d6bb8;
+  --grass: #1b7a3a;
+  --plum: #6a45c9;
+  --on-sun: #ffffff;
   --on-berry: #ffffff;
   --on-sky: #ffffff;
   --on-grass: #ffffff;
   --on-plum: #ffffff;
-  --live: #24803f;
-  --dev: #9a6a00;
+  --live: #1b7a3a;
+  --dev: #8f6000;
   color-scheme: light;
 }
 

@@ -43,12 +43,9 @@ const { current } = Astro.props;
     /* short and tight: a wider spread reached Android's system bar and was cut there (his note) */
     box-shadow: 0 3px 8px -2px rgb(0 0 0 / 0.38), 0 0 0 3px color-mix(in srgb, var(--paper) 80%, transparent);
   }
-  .slot { opacity: 0.82; }
-  /* light theme: the dimmed slots looked shaded on the dark frame, so they stay nearly full */
-  :global(:root[data-theme='light']) .slot { opacity: 0.94; }
-  /* where you are: full color, lifted, with a ring in the page color */
+  /* Every slot at full strength (#6): dimming them (0.82) mixed the frame into the fill and the label, and Music and
+     About fell under 4.5:1 in Lighthouse. "Where you are" is the lift and the ring, per the interaction standard. */
   .slot.here {
-    opacity: 1;
     transform: translateY(-4px);
     box-shadow: 0 0 0 2.5px var(--paper), 0 0 0 4.5px var(--c);
   }

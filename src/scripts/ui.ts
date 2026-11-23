@@ -162,6 +162,8 @@ document.addEventListener('click', (event) => {
   if (themeBtn) {
     const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
     document.documentElement.dataset.theme = next;
+    // the phone's browser bar follows (same pair as the head script in Base.astro)
+    document.querySelector('[data-theme-color]')?.setAttribute('content', next === 'light' ? '#ffffff' : '#141b26');
     try {
       localStorage.setItem(THEME_KEY, next);
     } catch {
