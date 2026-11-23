@@ -4,6 +4,7 @@ import Banner from '../components/home/Banner.astro';
 import Door from '../components/home/Door.astro';
 import { DOORS } from '../data/home';
 import { allProjects } from '../lib/projects';
+import { absoluteUrl } from '../lib/seo';
 
 const projects = await allProjects();
 
@@ -17,9 +18,24 @@ const doors = DOORS.map((door) => {
   return { door, items };
 });
 const motions = ['drop', 'up', 'drop'] as const;
+
+// Who the site is about, for search engines (#6). Public links only: no phone, no address.
+const person = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Assaf Elad',
+  alternateName: 'Bussuf',
+  url: absoluteUrl(import.meta.env.BASE_URL, Astro.site!),
+  sameAs: [
+    'https://www.linkedin.com/in/assafelad/',
+    'https://bussuf.itch.io',
+    'https://steamcommunity.com/profiles/76561198107536619/',
+  ],
+});
 ---
 
 <Base title="Assaf Elad">
+  <script type="application/ld+json" slot="head" set:html={person} />
   <Banner />
   <section
     class="grid grid-cols-1 gap-3.5 pb-10 nav:grid-cols-3 nav:gap-[18px]"

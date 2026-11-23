@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { withBase } from '../lib/nav';
+import { allProjects, projectHref } from '../lib/projects';
+
+// The same dice as the header: project pages only (#4).
+const diceTargets = JSON.stringify((await allProjects()).map(projectHref));
+const btn = 'go-btn inline-flex min-h-11 items-center gap-1.5 rounded-md border border-door px-4 py-1.5 text-[15px] font-medium text-ink';
+---
+
+<!-- GitHub Pages serves this for any address that is not a page (#6). Out of the sitemap, never indexed. -->
+<Base title="Page not found" description="This page is not here. Try the home page, or a random project." noindex>
+  <section class="k-home lost">
+    <p class="m-0 text-[15px] font-semibold text-door" data-a="left">404</p>
+    <h1 class="mt-1 mb-2 text-[clamp(30px,6vw,48px)] leading-[1.08] font-extrabold tracking-[-0.015em]" data-a="left" style="--d:60ms">
+      This page wandered off to play something else.
+    </h1>
+    <p class="m-0 max-w-[46ch] text-[17px] leading-normal text-soft" data-a="up" style="--d:120ms">
+      The address may be old, or a letter slipped. Go home, or let the dice pick a project.
+    </p>
+    <div class="mt-5 flex flex-wrap gap-3" data-a="up" style="--d:180ms">
+      <a href={withBase('/')} class={btn} data-sound="chord" data-nav="home">Home</a>
+      <button type="button" class:list={['dice', btn]} data-dice data-targets={diceTargets}>
+        <Icon name="dice" /><span data-dice-label>Surprise me</span>
+      </button>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lost { padding: 48px 0 24px; }
+  @media (min-width: 43.75rem) {
+    .lost { padding: 96px 0 48px; }
+  }
+</style>

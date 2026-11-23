@@ -6,16 +6,34 @@ import Header from '../components/Header.astro';
 import Hotbar from '../components/Hotbar.astro';
 import Footer from '../components/Footer.astro';
 import Ukulele from '../components/Ukulele.astro';
-import { navKeyOf, withBase } from '../lib/nav';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { navKeyOf, stripBase, withBase } from '../lib/nav';
+import { findImage } from '../lib/images';
+import { absoluteUrl } from '../lib/seo';
 
 interface Props {
   title: string;
   description?: string;
+  /** the picture a shared link shows; a project passes its hero, every other page gets the default */
+  image?: ImageMetadata;
+  /** kept out of search engines even on the real domain (the 404 page) */
+  noindex?: boolean;
 }
 
-const { title, description = 'Assaf Elad, also known as Bussuf: music, games I made, and apps I built.' } = Astro.props;
+const { title, description = 'Assaf Elad, also known as Bussuf: music, games I made, and apps I built.', noindex = false } = Astro.props;
 const current = navKeyOf(Astro.url.pathname);
-const pageTitle = current === 'home' ? title : `${title} | Assaf Elad`;
+const isHome = stripBase(Astro.url.pathname) === '/';
+const pageTitle = isHome ? title : `${title} | Assaf Elad`;
+
+// Open Graph (#6): the link preview in WhatsApp, LinkedIn and search. 1200x630 is the size every one of them shows
+// without cropping again. The default is the Now photo (his pick); its middle crop is the face (checked).
+// ("attention" cropping picked the columns behind him instead.)
+const site = Astro.site!;
+const canonical = absoluteUrl(Astro.url.pathname, site);
+const shareSrc = Astro.props.image ?? findImage('about-02.jpg');
+const share = shareSrc ? await getImage({ src: shareSrc, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 80 }) : undefined;
+const shareUrl = share ? absoluteUrl(share.src, site) : undefined;
 ---
 
 <!-- No cross-page animation: it made fast tab switching wait. Pages get their own entrance motion instead. -->
@@ -25,10 +43,31 @@ const pageTitle = current === 'home' ? title : `${title} | Assaf Elad`;
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {/* the 404 page answers for any address: no canonical of its own */}
+    {!noindex && <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <link rel="icon" href={withBase('/favicon.ico')} />
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
     {/* temporary address (#7): kept out of search engines until the real domain (#8) */}
-    {import.meta.env.BASE_URL !== '/' && <meta name="robots" content="noindex" />}
+    {(noindex || import.meta.env.BASE_URL !== '/') && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Assaf Elad" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {
+      share && shareUrl && (
+        <>
+          <meta property="og:image" content={shareUrl} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={`${title}, Assaf Elad`} />
+        </>
+      )
+    }
+    <meta name="twitter:card" content={share ? 'summary_large_image' : 'summary'} />
+    <slot name="head" />
     <meta name="generator" content={Astro.generator} />
     <Font cssVariable="--font-rubik" preload={[{ subset: 'latin' }]} />
     <!-- Before first paint: dark unless the visitor chose light. Re-applied after every page swap. -->

@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Room from '../../components/door/Room.astro';
 import { allProjects, type Project } from '../../lib/projects';
+import { findImage } from '../../lib/images';
 
 export const getStaticPaths = (async () => {
   const projects = await allProjects();
@@ -17,6 +18,10 @@ const { project } = Astro.props;
 ---
 
 <!-- A project inside its door's room (#12). -->
-<Base title={project.data.name} description={project.data.summary ?? `${project.data.name}: ${project.data.status}`}>
+<Base
+  title={project.data.name}
+  description={project.data.summary ?? `${project.data.name}: ${project.data.status}`}
+  image={findImage(project.data.hero.file)}
+>
   <Room door={project.data.door} project={project} />
 </Base>

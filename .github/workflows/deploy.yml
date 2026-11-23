@@ -23,6 +23,7 @@ jobs:
       - uses: withastro/action@v4
         env:
           # temporary address https://bussuf.github.io/assafelad-site/ until the domain moves (#8)
+          SITE_URL: https://bussuf.github.io
           SITE_BASE: /assafelad-site
 
   deploy:
