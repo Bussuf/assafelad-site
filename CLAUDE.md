@@ -72,6 +72,14 @@ Rules: never two motions on the same thing at once (press, then scroll, then con
 | Ukulele mode | With sound on: Apps, Music, Games, About three times in a row (G C E A) |
 Sounds are synthesized with Web Audio (no library) until Assaf supplies recordings.
 
+## Phone mode (widens the global terminal rule, his approval 2026-11-23)
+For days he works from his phone through Remote Control.
+- On only when he writes "מצב טלפון", for that session only. Off when he writes "סוף מצב טלפון" or the session ends.
+- Allowed to Claude while on: `npm run check`, `npm run build`, `npm run test`, then `git add` + `git commit` + `git push` to `main` of this repo only, and only when check and build are clean.
+- Still not allowed: installing or removing packages, deleting or moving files, anything outside this repo, secrets, settings.
+- Before every push: show the list of files and the commit message, and wait for "יאללה push" from him. That is his explicit approval, per push.
+- After every push: report the message, the files, and what to look at on the live site.
+
 ## Terminal and checks
 - Assaf runs every command that writes, installs, builds or commits (global rule, not widened here).
 - Dev server: `npm run dev` at http://localhost:4321. Stop it before installing or removing packages.
