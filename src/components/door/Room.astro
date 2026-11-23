@@ -159,7 +159,8 @@ const aboutTodo = music
   .item[aria-current='page'] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--raise)); }
   .item[aria-current='page'] .chev { transform: translateX(3px) scale(1.12); }
   @media (hover: hover) and (pointer: fine) {
-    .item:hover { border-color: var(--c); }
+    /* hover = border + soft fill, like the About topics and every other button (his note: one language) */
+    .item:hover { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--raise)); }
   }
 
   .panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
