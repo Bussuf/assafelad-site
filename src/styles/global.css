@@ -157,11 +157,23 @@
     background-color: color-mix(in srgb, var(--c, var(--link)) 14%, transparent);
   }
   html [data-peek]:hover { color: var(--c-on); background-color: color-mix(in srgb, var(--c-on) 18%, transparent); }
+  /* interaction standard: button-like links take the same hover (border + soft fill) */
+  html :is(.pg, [data-topics] .hl):hover {
+    border-color: var(--c, var(--link));
+    background-color: color-mix(in srgb, var(--c, var(--link)) 14%, var(--raise));
+  }
+  /* TEXT: a very subtle hover, the text leans a little toward the door color */
+  html :is(header nav a[data-nav], footer a, .text-link, .door-title):hover {
+    color: color-mix(in srgb, var(--ink) 78%, var(--c, var(--link)));
+  }
+  /* CARD (information only): a soft highlight on hover, the border warms toward the door color */
+  html [data-topic-panel]:hover { border-color: color-mix(in srgb, var(--c, var(--link)) 55%, var(--rule)); }
+  html [data-topics] .game { border-radius: 6px; transition: background-color 0.15s; }
+  html [data-topics] .game:hover { background-color: color-mix(in srgb, var(--c, var(--link)) 10%, transparent); }
   html .logo-link:hover { opacity: 0.85; }
 }
-html :is(.play-btn, [data-pause], [data-filter], [data-layout], [data-close], [data-uke-close], [data-chord], [data-strum], [data-four], [data-peek], .go-btn):active {
-  transform: scale(0.97);
-}
+/* the press itself (sink, spring back, ring) is in ui.ts for every button, so no :active scale here:
+   two shrinks at once looked jumpy */
 
 /* the second Play button: outlined, so the main one stays the main one */
 .play-btn.play-alt {

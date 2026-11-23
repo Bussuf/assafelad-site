@@ -20,7 +20,7 @@ const { current } = Astro.props;
         <a
           href={item.href}
           class:list={[
-            `slot k-${item.key} grid h-[54px] w-[58px] content-center justify-items-center gap-0.5 rounded-xl bg-door text-[11px] font-semibold text-[var(--c-on)] transition-transform active:scale-95`,
+            `slot k-${item.key} grid h-[54px] w-[58px] content-center justify-items-center gap-0.5 rounded-xl bg-door text-[11px] font-semibold text-[var(--c-on)] transition-transform`,
             current === item.key && 'here',
           ]}
           aria-current={current === item.key ? 'page' : undefined}
@@ -52,5 +52,4 @@ const { current } = Astro.props;
     transform: translateY(-4px);
     box-shadow: 0 0 0 2.5px var(--paper), 0 0 0 4.5px var(--c);
   }
-  .slot.here:active { transform: translateY(-4px) scale(0.95); }
 </style>

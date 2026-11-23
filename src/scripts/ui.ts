@@ -27,36 +27,110 @@ document.addEventListener(
   { capture: true },
 );
 
-/* Press feedback, one for the whole site (his note: taps felt dead on the phone, also with sound off;
-   tested on About first). Buttons and button-like cards only, never a link inside text: the list is here, once.
-   The ring is the control's own outline, growing out and fading, so it moves with the control when the page
-   scrolls and is gone when the control is gone. A short pop goes with it, on the `scale` property, so it adds to
-   a control's own lift (the Hotbar slot) instead of replacing it.
-   Web Animations only: no class is added, so a control's CSS animations (entrance motion) are never restarted.
-   The one exception to "transform/opacity only": outline-offset and outline-color, paint only, no layout. */
-const PRESSABLE =
-  'button, [role="button"], a[data-nav], .go-btn, .play-btn, [data-door] .dmain, .room .item, [data-topics] .hl';
-function pressFx(el: HTMLElement): void {
+/* Interaction standard (CLAUDE.md, his definitions). The kinds live here, once:
+   - BUTTON: takes a click and changes navigation or the UI. Press = sinks on pointerdown and stays down while held;
+     release = springs back and a highlight ring (the control's own outline) grows out and fades.
+   - TEXT: a text link (header tabs, footer, links in a sentence). Its own press: a short underline drawn from the center.
+   Web Animations only: no class is added, so a control's CSS animations (entrance motion) never restart.
+   `scale`, not `transform`, so it adds to a control's own lift (the Hotbar slot).
+   The one exception to "transform/opacity only": outline and the underline's background-size, paint only. */
+const BUTTON =
+  'button, [role="button"], .hotbar a, .go-btn, .play-btn, [data-door] .dmain, .room .item, [data-topics] .hl, .pg';
+const TEXT = 'header nav a[data-nav], .logo-link, footer a, .text-link, .door-title';
+const EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
+
+const colorOf = (el: Element): string => {
   const style = getComputedStyle(el);
-  const color = style.getPropertyValue('--c').trim() || style.getPropertyValue('--link').trim() || 'currentColor';
-  const timing = { duration: 300, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' };
+  return style.getPropertyValue('--c').trim() || style.getPropertyValue('--link').trim() || 'currentColor';
+};
+const isWide = (el: Element) => el.getBoundingClientRect().width > 220;
+
+const held = new WeakMap<HTMLElement, Animation>();
+function sink(el: HTMLElement): void {
+  if (reduceMotion()) return;
+  held.get(el)?.cancel();
+  held.set(el, el.animate([{ scale: '1' }, { scale: isWide(el) ? '0.98' : '0.94' }], { duration: 110, easing: 'ease-out', fill: 'forwards' }));
+}
+function release(el: HTMLElement): void {
+  const down = held.get(el);
+  held.delete(el);
   if (!reduceMotion()) {
-    const big = el.getBoundingClientRect().width > 220;
-    el.animate([{ scale: '1' }, { scale: big ? '0.98' : '0.94', offset: 0.35 }, { scale: '1' }], timing);
+    const from = down ? String(getComputedStyle(el).scale === 'none' ? 1 : getComputedStyle(el).scale) : '1';
+    down?.cancel();
+    el.animate([{ scale: from }, { scale: isWide(el) ? '1.01' : '1.04', offset: 0.55 }, { scale: '1' }], { duration: 300, easing: EASE });
   }
   el.animate(
     [
-      { outlineStyle: 'solid', outlineWidth: '2px', outlineColor: color, outlineOffset: '0px' },
+      { outlineStyle: 'solid', outlineWidth: '2px', outlineColor: colorOf(el), outlineOffset: '0px' },
       { outlineStyle: 'solid', outlineWidth: '2px', outlineColor: 'transparent', outlineOffset: reduceMotion() ? '0px' : '7px' },
     ],
-    timing,
+    { duration: 300, easing: EASE },
+  );
+}
+function underline(el: HTMLElement): void {
+  const line = `linear-gradient(${colorOf(el)}, ${colorOf(el)})`;
+  const base = { backgroundImage: line, backgroundRepeat: 'no-repeat', backgroundPosition: '50% 100%' };
+  el.animate(
+    [
+      { ...base, backgroundSize: '0% 2px', opacity: 1 },
+      { ...base, backgroundSize: '100% 2px', offset: 0.6 },
+      { ...base, backgroundSize: '100% 2px', opacity: 1 },
+    ],
+    { duration: reduceMotion() ? 150 : 300, easing: EASE },
   );
 }
 
-document.addEventListener('click', (event) => {
-  const el = (event.target as Element | null)?.closest<HTMLElement>(PRESSABLE);
-  if (el && !(el as HTMLButtonElement).disabled) pressFx(el);
+const usable = (el: HTMLElement | null): el is HTMLElement => !!el && !(el as HTMLButtonElement).disabled;
+document.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  const target = e.target as Element;
+  const btn = target.closest<HTMLElement>(BUTTON);
+  if (usable(btn)) return sink(btn);
+  const text = target.closest<HTMLElement>(TEXT);
+  if (text) underline(text);
 });
+const letGo = (e: PointerEvent) => {
+  const btn = (e.target as Element).closest<HTMLElement>(BUTTON);
+  if (btn && held.has(btn)) release(btn);
+};
+document.addEventListener('pointerup', letGo);
+// a finger that slides away (a scroll) puts the button back quietly, without the ring
+document.addEventListener('pointercancel', (e) => {
+  const btn = (e.target as Element).closest<HTMLElement>(BUTTON);
+  const down = btn && held.get(btn);
+  if (down) {
+    down.cancel();
+    held.delete(btn);
+  }
+});
+// keyboard (Enter / Space) has no pointer: the whole press on click
+document.addEventListener('click', (e) => {
+  if (e.detail !== 0) return;
+  const target = e.target as Element;
+  const btn = target.closest<HTMLElement>(BUTTON);
+  if (usable(btn)) release(btn);
+  else {
+    const text = target.closest<HTMLElement>(TEXT);
+    if (text) underline(text);
+  }
+});
+
+/* A link that opens a page here waits 200ms, so its press is seen before the page swaps (prefetch made the
+   swap instant and cut the effect). Capture on window: runs before the ClientRouter, which skips prevented clicks. */
+addEventListener(
+  'click',
+  (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = (e.target as Element).closest<HTMLAnchorElement>('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-back-top')) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin || (url.pathname === location.pathname && url.hash)) return;
+    if (url.href === location.href) return;
+    e.preventDefault();
+    setTimeout(() => void navigate(url.href), 200);
+  },
+  { capture: true },
+);
 
 /* The three header tools get a move of their own on top (his pick, option A). */
 function iconMove(btn: Element, frames: Keyframe[], duration: number): void {
