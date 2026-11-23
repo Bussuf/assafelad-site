@@ -76,7 +76,8 @@ Sounds are synthesized with Web Audio (no library) until Assaf supplies recordin
 For days he works from his phone through Remote Control.
 - On only when he writes "מצב טלפון", for that session only. Off when he writes "סוף מצב טלפון" or the session ends.
 - Allowed to Claude while on: `npm run check`, `npm run build`, `npm run test`, then `git add` + `git commit` + `git push` to `main` of this repo only, and only when check and build are clean.
-- Still not allowed: installing or removing packages, deleting or moving files, anything outside this repo, secrets, settings.
+- Any other command (install, move, delete, outside this repo, settings): Claude shows the exact command and what it does, and asks. With his explicit approval for that one command, Claude runs it. Protocol is never a reason to stop him; ask, then do (his rule).
+- The only things that stay off even with approval are the hard safety limits Claude cannot lift: reading secret files (`.env*` etc.) and typing passwords or credentials. For those Claude says so and gives him the command to run himself later.
 - Before every push: show the list of files and the commit message, and wait for "יאללה push" from him. That is his explicit approval, per push.
 - After every push: report the message, the files, and what to look at on the live site.
 
