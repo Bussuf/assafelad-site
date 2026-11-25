@@ -34,8 +34,8 @@ const projects = defineCollection({
     link: z.object({ label: z.string(), url: z.url().optional() }).optional(),
     /** a management system with real data: screenshots only, never a live link */
     private: z.boolean().default(false),
-    /** what Play opens: a game in a window, the Windows download page, or a song player */
-    play: z.enum(['window', 'download', 'song']).optional(),
+    /** what Play opens: a game in a window, the Windows download page, a song player, or the app's own page (link.url) */
+    play: z.enum(['window', 'download', 'song', 'app']).optional(),
     /** the game inside the window: an official embed page and the game's own size */
     embed: embed.optional(),
     /** a second Play button, for an extra playable version (ChessLord's early version) */
@@ -44,7 +44,8 @@ const projects = defineCollection({
     gallery: z.array(shot).default([]),
   }).refine((p) => p.summary || p.summaryTodo, { message: 'Give a summary, or a summaryTodo saying what to write' })
     .refine((p) => !(p.private && p.link?.url), { message: 'A private system must not link to the live system' })
-    .refine((p) => !p.embed || p.play === 'window', { message: 'embed only makes sense with play: window' }),
+    .refine((p) => !p.embed || p.play === 'window', { message: 'embed only makes sense with play: window' })
+    .refine((p) => p.play !== 'app' || p.link?.url, { message: 'play: app opens link.url, so give one' }),
 });
 
 export const collections = { projects };

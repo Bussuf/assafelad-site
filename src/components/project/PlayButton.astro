@@ -12,10 +12,17 @@ interface Props {
 const { project, variant = 'main', class: className } = Astro.props;
 const isDemo = variant === 'demo';
 const show = isDemo ? !!project.data.demo : !!project.data.play;
+// PETS: the green button goes to the app's own landing page, in a new tab, instead of opening a window
+const appUrl = !isDemo && project.data.play === 'app' ? project.data.link?.url : undefined;
 ---
 
 {
-  show && (
+  appUrl ? (
+    <a href={appUrl} target="_blank" rel="noopener" class:list={['play-btn', 'relative z-[1]', className]}>
+      <Icon name="play" class="size-3 fill-current stroke-none" />
+      {playLabel(project)}
+    </a>
+  ) : show && (
     <button
       type="button"
       class:list={[isDemo ? 'play-btn play-alt' : 'play-btn', 'relative z-[1]', className]}

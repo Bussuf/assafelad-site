@@ -6,6 +6,8 @@ status: Landing page live
 state: live
 made: Flutter
 summary: An Android app, with its own landing page.
+link: { label: PETS landing page, url: https://bussuf.github.io/pets-landing-page/ }
+play: app
 hero: { caption: "PETS landing page, top of the page", file: pets-01.png, kind: screen }
 gallery:
   - { caption: "PETS logo or icon", file: pets-04.png, kind: screen }

@@ -13,7 +13,8 @@ interface Props {
 const { project, variant = 'main' } = Astro.props;
 const { name, door, status, state, demo } = project.data;
 const isDemo = variant === 'demo';
-const play = isDemo ? (demo ? 'window' : undefined) : project.data.play;
+// "app" leaves the site for the app's own page: no window
+const play = isDemo ? (demo ? 'window' : undefined) : project.data.play === 'app' ? undefined : project.data.play;
 const embed = isDemo ? demo?.embed : project.data.embed;
 const link = isDemo ? (demo ? { label: 'Unity Play', url: demo.link } : undefined) : project.data.link;
 const key = isDemo ? `${project.id}--demo` : project.id;

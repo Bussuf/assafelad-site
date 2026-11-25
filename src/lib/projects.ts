@@ -27,6 +27,7 @@ export function countLine(door: DoorKey, items: Project[]): string {
 export function playLabel(p: Project): string {
   if (p.data.play === 'song') return 'Play a song';
   if (p.data.play === 'download') return 'Download (Windows)';
+  if (p.data.play === 'app') return 'Get the app';
   return 'Play now';
 }
 
