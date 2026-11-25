@@ -1,7 +1,8 @@
 ---
 import Icon from '../Icon.astro';
 import Placeholder from '../Placeholder.astro';
-import { langOf, type Project } from '../../lib/projects';
+import { langOf, splitTitle, type Project } from '../../lib/projects';
+import { findAudio } from '../../lib/images';
 
 /* The window that Play opens: the game itself (official embed), the Windows download, or the song player. */
 interface Props {
@@ -19,6 +20,14 @@ const embed = isDemo ? demo?.embed : project.data.embed;
 const link = isDemo ? (demo ? { label: 'Unity Play', url: demo.link } : undefined) : project.data.link;
 const key = isDemo ? `${project.id}--demo` : project.id;
 const music = play === 'song';
+// the song player (#19): the file loads only on Play; the lyrics in stanzas, lines kept as written
+const song = music && !isDemo ? project.data.song : undefined;
+const songUrl = song ? findAudio(song.file) : undefined;
+const [songMain, songParen] = splitTitle(song?.title ?? '');
+const stanzas = (song?.lyrics ?? '')
+  .trim()
+  .split(/\n\s*\n/)
+  .map((s) => s.split('\n').map((l) => l.trim()).filter(Boolean));
 
 const note = isDemo
   ? 'An early version. Plays here; keyboard and mouse work inside the window.'
@@ -59,6 +68,26 @@ const stand =
             allow="autoplay; fullscreen; gamepad"
             allowfullscreen
           />
+        ) : song && songUrl ? (
+          <div class="song">
+            <h3 class="stitle"><bdi lang={langOf(songMain)}>{songMain}</bdi>{songParen && ` ${songParen}`}</h3>
+            <p class="credit">{song.credit}</p>
+            <audio src={songUrl} controls preload="none" aria-label={`${song.title}, Assaf Elad`} />
+            {stanzas.length > 0 && stanzas[0]!.length > 0 && (
+              <div class="lyrics" lang="he" dir="rtl" tabindex="0" aria-label="Lyrics">
+                {stanzas.map((lines) => (
+                  <p>
+                    {lines.map((l, i) => (
+                      <>
+                        {i > 0 && <br />}
+                        {l}
+                      </>
+                    ))}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
         ) : (
           <Placeholder caption={stand} file={`${project.id}-play`} kind="screen" ratio={music ? '21:9' : '16:9'} size="small" />
         )}
@@ -114,6 +143,25 @@ const stand =
     height: auto;
     background: var(--paper);
   }
+  /* the song player: title, credit, the player, and the lyrics scrolling inside the window */
+  .song { display: grid; gap: 8px; width: min(480px, calc(100vw - 72px)); }
+  .stitle { margin: 0; font-size: 22px; font-weight: 700; line-height: 1.2; }
+  .credit { margin: 0; font-size: 13.5px; color: var(--soft); }
+  .song audio { width: 100%; margin-top: 4px; }
+  .lyrics {
+    max-height: min(46dvh, 420px);
+    overflow-y: auto;
+    margin-top: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--paper);
+    font-size: 16px;
+    line-height: 1.7;
+    text-align: right;
+  }
+  .lyrics p { margin: 0 0 14px; }
+  .lyrics p:last-child { margin-bottom: 0; }
   .gfoot {
     display: flex;
     flex-wrap: wrap;
@@ -145,7 +193,11 @@ const stand =
     const dialog = target?.closest<HTMLDialogElement>('dialog[data-game-window]');
     if (!dialog) return;
     // Close button, or a click on the dim area around the window (the dialog itself, not its content)
-    if (target?.closest('[data-close]') || target === dialog) dialog.close();
+    if (target?.closest('[data-close]') || target === dialog) {
+      // stop the song right away (the close event comes a moment later, and covers Esc)
+      dialog.querySelector('audio')?.pause();
+      dialog.close();
+    }
   });
 
   document.addEventListener(
@@ -154,6 +206,8 @@ const stand =
       const dialog = event.target as Element;
       if (!(dialog instanceof HTMLDialogElement) || !dialog.matches('[data-game-window]')) return;
       dialog.querySelector('iframe')?.removeAttribute('src');
+      // the song stops with the window (it keeps its place for the next open)
+      dialog.querySelector('audio')?.pause();
     },
     true,
   );

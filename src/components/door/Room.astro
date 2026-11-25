@@ -8,7 +8,7 @@ import PlayButton from '../project/PlayButton.astro';
 import GameWindow from '../project/GameWindow.astro';
 import ProjectSwitcher from '../project/ProjectSwitcher.astro';
 import { DOORS } from '../../data/home';
-import { countLine, langOf, projectHref, projectsOf, type DoorKey, type Project } from '../../lib/projects';
+import { countLine, langOf, projectHref, projectsOf, splitTitle, type DoorKey, type Project } from '../../lib/projects';
 import { findImage, isTall } from '../../lib/images';
 
 /* A door is a "room" (his design, #12): on a computer three columns in one screen - the door, every project as a
@@ -27,6 +27,9 @@ const items = await projectsOf(door);
 const current = Astro.props.project ?? items[0]!;
 const { name, status, state, made, summary, summaryTodo, link } = current.data;
 const music = door === 'music';
+// "השכנים (The Neighbors)": if the title must wrap, the English part in brackets goes down whole (his note, 2026-11-25:
+// "Neighbors)" alone on the second line looked broken)
+const [titleMain, titleParen] = splitTitle(name);
 const { Content } = await render(current);
 const hasAbout = !!current.body?.trim();
 // The project area follows the pictures' shape (his pick, #13): wide shots get a wide image on top with the text
@@ -89,9 +92,9 @@ const aboutTodo = music
         <span class="h-[30px] w-2.5 flex-none rounded-[3px] bg-door" aria-hidden="true"></span>
         {
           mode === 'project' ? (
-            <h1 id="project-title" class="ptitle"><bdi lang={langOf(name)}>{name}</bdi></h1>
+            <h1 id="project-title" class="ptitle"><bdi lang={langOf(name)}>{titleMain}</bdi>{titleParen && <> <span class="nowrap">{titleParen}</span></>}</h1>
           ) : (
-            <h2 id="project-title" class="ptitle"><bdi lang={langOf(name)}>{name}</bdi></h2>
+            <h2 id="project-title" class="ptitle"><bdi lang={langOf(name)}>{titleMain}</bdi>{titleParen && <> <span class="nowrap">{titleParen}</span></>}</h2>
           )
         }
       </div>
@@ -123,7 +126,9 @@ const aboutTodo = music
               ? <a href={link.url} class="text-link underline underline-offset-2" target="_blank" rel="noopener"> {link.label}</a>
               : link
                 ? ` ${link.label}`
-                : ' [Link coming.]'
+                : current.data.song
+                  ? ' Only here, nowhere else online. Press Play a song.'
+                  : ' [Link coming.]'
         }
       </p>
     </div>
@@ -166,6 +171,11 @@ const aboutTodo = music
   .panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
   .phead { display: flex; flex-direction: column; gap: 8px; }
   .ptitle { margin: 0; font-size: clamp(28px, 3vw, 40px); line-height: 1.05; font-weight: 800; letter-spacing: -0.015em; }
+  .ptitle .nowrap { white-space: nowrap; }
+  /* a phone a little narrower than 375px (360) still gets "השכנים (The Neighbors)" on one line */
+  @media (max-width: 43.74rem) {
+    .ptitle { font-size: min(28px, 7vw); }
+  }
   .info { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
   .lead { margin: 0; font-size: 16.5px; color: var(--soft); }
   .about { border-top: 1px solid var(--rule); padding-top: 12px; font-size: 15px; line-height: 1.55; }

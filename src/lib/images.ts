@@ -11,6 +11,17 @@ export const findImage = (file: string): ImageMetadata | undefined => byName.get
 const videoFiles = import.meta.glob<string>('/src/assets/videos/*.mp4', { eager: true, query: '?url', import: 'default' });
 const videoByName = new Map(Object.entries(videoFiles).map(([path, url]) => [path.split('/').pop()!, url]));
 
+/* Songs (#19) live in src/assets/audio/, the same way. */
+const audioFiles = import.meta.glob<string>('/src/assets/audio/*.mp3', { eager: true, query: '?url', import: 'default' });
+const audioByName = new Map(Object.entries(audioFiles).map(([path, url]) => [path.split('/').pop()!, url]));
+
+/** The URL of a song file; a missing file stops the build. */
+export const findAudio = (file: string): string => {
+  const url = audioByName.get(file);
+  if (!url) throw new Error(`Song not found in src/assets/audio/: ${file}`);
+  return url;
+};
+
 /** The URL of a video file; a missing file stops the build, since a video slot has no placeholder. */
 export const findVideo = (file: string): string => {
   const url = videoByName.get(file);

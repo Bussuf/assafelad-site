@@ -31,5 +31,12 @@ export function playLabel(p: Project): string {
   return 'Play now';
 }
 
+/** "השכנים (The Neighbors)" -> ["השכנים", "(The Neighbors)"]: the Hebrew goes in its own <bdi lang="he">, so the English
+    in brackets stays after it on an English page (inside one RTL bdi it jumped to the left), and can wrap down whole. */
+export function splitTitle(name: string): [string, string | undefined] {
+  const m = /^(.+?) (\(.+\))$/.exec(name);
+  return m ? [m[1]!, m[2]] : [name, undefined];
+}
+
 /** lang="he" for Hebrew names (the band), so screen readers switch voice. */
 export const langOf = (s: string): 'he' | undefined => (/[֐-׿]/.test(s) ? 'he' : undefined);
