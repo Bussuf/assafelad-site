@@ -8,6 +8,8 @@ const shot = z.object({
   /** the file name from the assets checklist, e.g. "chesslord-01.png" */
   file: z.string().regex(/^[a-z0-9-]+\.(jpg|png)$/),
   kind: z.enum(['photo', 'screen']),
+  /** a video in src/assets/videos/ (#15); `file` is then its cover picture */
+  video: z.string().regex(/^[a-z0-9-]+\.mp4$/).optional(),
 });
 
 /** A game inside the window: an embed page and the game's own size (sets the window's shape). */

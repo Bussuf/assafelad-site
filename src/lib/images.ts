@@ -7,6 +7,17 @@ const byName = new Map(Object.entries(files).map(([path, mod]) => [path.split('/
 
 export const findImage = (file: string): ImageMetadata | undefined => byName.get(file);
 
+/* Videos (#15) live in src/assets/videos/: the build copies each one with a hashed name and gives its URL. */
+const videoFiles = import.meta.glob<string>('/src/assets/videos/*.mp4', { eager: true, query: '?url', import: 'default' });
+const videoByName = new Map(Object.entries(videoFiles).map(([path, url]) => [path.split('/').pop()!, url]));
+
+/** The URL of a video file; a missing file stops the build, since a video slot has no placeholder. */
+export const findVideo = (file: string): string => {
+  const url = videoByName.get(file);
+  if (!url) throw new Error(`Video not found in src/assets/videos/: ${file}`);
+  return url;
+};
+
 /** Phone-shaped (portrait) screenshots get a gallery of tall cells instead of wide ones. */
 export const isTall = (file: string): boolean => {
   const img = byName.get(file);
